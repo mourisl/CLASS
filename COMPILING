@@ -1,0 +1,64 @@
+CLASS - Constraint-based Local Assembly and Selection of Splice variants
+
+This guide tells how to compile and install the software.
+
+----------------------------------------
+Quick Instructions:
+
+Edit the Makefile, change the bam library and header files paths
+(BAM_INCLUDE, BAM_LIB) to point to the corresponding locations for samtools
+library and header files on your system, then run:
+   % sh build.sh
+
+The software is compiled in place.
+----------------------------------------
+Detailed instructions:
+
+0) Required software and data 
+1) Compilation
+2) Installation
+3) Run
+-------
+0) Required software
+
+To install and run CLASS, you will need to download and
+install several packages:
+
+0.1)  samtools
+Performs managment of large short read alignment files. Freely
+available from Sourceforge: http://samtools.sourceforge.net .
+
+0.2)  lpsolve
+Is a Mixed Integer Linear Programming (MILP) solver. A copy of the
+software is already included with this package (subdirectory lp_solve_5.5)
+and will be compiled when running build.sh. It is also freely available
+from Sourceforge: http://sourceforge.net/projects/lpsolve/. Version
+should be no less than 5.5.
+
+IMPORTANT: lpsolve and samtools have a duplicated variable name, you need to
+	   change the name if you plan to build lpsolve yourself from
+           independent source code.
+-------
+
+1) Compilation
+Run  % sh build.sh
+
+If you see any errors, please send us an email including the error
+message. The software was developed for RedHat Linux and may
+need adjustments to work on other Unix platforms.
+
+-------
+
+2) Installation
+
+None needed for this version.
+
+-------
+
+3) Run
+
+See README. 
+
+-------
+
+Contact us: lsong@jhu.edu, florea@jhu.edu

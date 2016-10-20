@@ -1,0 +1,27 @@
+1/27/2013 CLASS v1.0.1  Initial release
+6/16/2013 CLASS v1.0.3  
+8/20/2013 CLASS v1.0.4  
+9/13/2013 CLASS v1.0.5
+10/28/2013 CLASS v1.0.6:
+	Use static linked library of lpsolve55.
+	Improve the precision of intron retention.
+5/9/2014 CLASS v2.0.0:
+	Improved sensitivity of transcriptome assembly.
+	Supporting multi-threads.
+2/9/2015 CLASS v2.1.0:
+	Use a new wrapper to run CLASS. 
+	Change the transcript_id field in the GTF file as "chr_id.gene_id.txpt_id".
+	Add samtools package into release.
+5/19/2015 CLASS v2.1.1:
+	Fix a bug in the wrapper.
+10/21/2015 CLASS v2.1.2:
+	Fix a serious bug which breaks the predicted transcripts into fragments.
+1/28/2016 CLASS v2.1.3:
+	Introduce "-l" option to add a prefix to the ids in the GTF file.
+	Add the version and command line information to the output.
+3/17/2016 CLASS v2.1.4:
+	Improve the accuracy when giving annoation through -e option.
+7/29/2016 CLASS v2.1.5:
+	Ignore reads with different read length by default.
+	Identify more alternative 3',5'-UTR.
+	Fix a bug when read depth is 0 on a position.
