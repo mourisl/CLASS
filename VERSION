@@ -25,3 +25,5 @@
 	Ignore reads with different read length by default.
 	Identify more alternative 3',5'-UTR.
 	Fix a bug when read depth is 0 on a position.
+10/26/2016 CLASS v2.1.6:
+	Handle non-canconical splice sites
