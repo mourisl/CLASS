@@ -15,16 +15,8 @@ Copyright (C) 2012-2013, and GNU GPL, by Li Song, Liliana Florea
 Includes portions copyright from:
 
 lp_solve - Copyright (C) 2005, and GNU LGPL, by Michel Berkelaar, Kjell Eikland, Peter Notebaert
-SAMtools - Copyright (C) 2008-2009, Genome Research Ltd, Heng Li
 
-### Content:
-I.   What is CLASS?
-II.  Install
-III.  Usage
-IV. Input/Output
-V.  Example
-VI.   Terms of use
-VII.  Support
+SAMtools - Copyright (C) 2008-2009, Genome Research Ltd, Heng Li
 
 ### I.   What is CLASS?
 
@@ -58,7 +50,6 @@ The software is compiled in place
 		--wd tempoaray_file_directory: the directory storing the temporary files (default: ./class_tmp)
 		--clean: whehter to remove the temporary files in -wd (default: no)
 
-
 ### IV. Input/Output
 
 The primary input to CLASS is a set of short read alignments in BAM format
@@ -72,10 +63,11 @@ x.depth and x.splice in the temporary working directory.
     chrom_id position #_of_reads_on_the_position
 
   * The format of the x.splice file, generate by 'junc', is:
-    chrom_id start_intron_position end_intron_position #_of_supporting_reads strand\ 
-     #_unique_support_read #_multi-aligned_support_read\ 
-     sum_of_unique_support_reads_edit_distance\
-     sum_of_multi-aligned_support_reads_edit_distance
+
+    chrom_id start_intron_position end_intron_position #_of_supporting_reads strand 
+     #_unique_support_read #_multi-aligned_support_read 
+     sum_of_unique_support_reads_edit_distance 
+     sum_of_multi-aligned_support_reads_edit_distance 
 
     NOTE: When using the '-a' argument, the value #_of_supporting_reads can be
     negative, indicating that this splice junction is invalid.
