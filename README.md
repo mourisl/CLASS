@@ -64,10 +64,9 @@ x.depth and x.splice in the temporary working directory.
 
   * The format of the x.splice file, generate by 'junc', is:
 
-    chrom_id start_intron_position end_intron_position #_of_supporting_reads strand 
-     #_unique_support_read #_multi-aligned_support_read 
-     sum_of_unique_support_reads_edit_distance 
-     sum_of_multi-aligned_support_reads_edit_distance 
+	chrom_id start_intron_position end_intron_position #_of_supporting_reads strand 
+	#_unique_support_read #_multi-aligned_support_read 
+	sum_of_unique_support_reads_edit_distance sum_of_multi-aligned_support_reads_edit_distance 
 
     NOTE: When using the '-a' argument, the value #_of_supporting_reads can be
     negative, indicating that this splice junction is invalid.
