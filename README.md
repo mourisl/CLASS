@@ -54,7 +54,17 @@ The software is compiled in place
 
 The primary input to CLASS is a set of short read alignments in BAM format
 and sorted by chromosome and position, for instance one produced with
-the program Tophat2 (http://tophat.cbcb.umd.edu).  
+the program [Tophat2](http://tophat.cbcb.umd.edu).  
+
+CLASS requires XS field in BAM file to know the strand of spliced alignment. 
+If the tools does not provide XS field, such as the default behavior of [STAR](https://github.com/alexdobin/STAR),
+you can use the program "addXS" in the package to add XS field to the BAM file. You can run "addXS" as:
+
+	./addXS reference_genome.fa < sam_file
+
+The typical usage with BAM file can be:
+
+	samtools view -h in.bam | ./addXS reference_genome.fa | samtools view -bS - > out.bam 
 
 Given an alignment input x.bam, CLASS produces two intermediate data files,
 x.depth and x.splice in the temporary working directory.
