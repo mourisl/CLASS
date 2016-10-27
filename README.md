@@ -4,9 +4,11 @@ CLASS - Constraint-based Local Assembly and Selection of Splice variants
 Described in: 
  
 Current (dynamic-programming) version:
+
 Song, L., Sabunciyan, S., and Florea, L. (2016). CLASS2: accurate and efficient splice variant annotation from RNA-seq reads. Nucleic Acids Research 2016; doi: 10.1093/nar/gkw158
 
 Previous ('set cover') version:
+
 Song, L. and Florea, L. (2013). CLASS: Constrained Transcript Assembly of RNA-seq Reads.
 Third Annual RECOMB Satellite Workshop on Massively Parallel Sequencing - RECOMB-SEQ 2013. BMC Bioinformatics 14(Suppl. 5), S14.
 
