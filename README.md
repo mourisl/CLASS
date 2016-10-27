@@ -43,20 +43,20 @@ Run: % sh build.sh
 The software is compiled in place
 
 ### III.  Usage
-Usage: perl run_class.pl [options]
-Options:
-	-a alignment_file (REQUIRED): the path to the alignemtn file(in SAM or BAM format)
-	-o output_file: the file storing the output of CLASS (default: ./alignment_file_wo_extension.gtf)
-	-p number_of_threads: specify the number of worker threads (default:1)
-	-F f: do not report the transcripts whose abundance level is lower than f*|most expressed transcript| in a gene
-	-l label: add a prefix and a "_" to the ids in the GTF file (default: not used)
-	-j junction: the path to the splice junction file
-	-e evidence: the path to the evidence files
-	--var_rd_len: extensive variable read lengths, i.e. reads after trimming (default: no)
-	--set-cover: use set cover to build transcripts from splicing graph (default: no)
-	--verbose: also output the procedure of CLASS (default: no)
-	--wd tempoaray_file_directory: the directory storing the temporary files (default: ./class_tmp)
-	--clean: whehter to remove the temporary files in -wd (default: no)
+	Usage: perl run_class.pl [options]
+	Options:
+		-a alignment_file (REQUIRED): the path to the alignemtn file(in SAM or BAM format)
+		-o output_file: the file storing the output of CLASS (default: ./alignment_file_wo_extension.gtf)
+		-p number_of_threads: specify the number of worker threads (default:1)
+		-F f: do not report the transcripts whose abundance level is lower than f*|most expressed transcript| in a gene
+		-l label: add a prefix and a "_" to the ids in the GTF file (default: not used)
+		-j junction: the path to the splice junction file
+		-e evidence: the path to the evidence files
+		--var_rd_len: extensive variable read lengths, i.e. reads after trimming (default: no)
+		--set-cover: use set cover to build transcripts from splicing graph (default: no)
+		--verbose: also output the procedure of CLASS (default: no)
+		--wd tempoaray_file_directory: the directory storing the temporary files (default: ./class_tmp)
+		--clean: whehter to remove the temporary files in -wd (default: no)
 
 
 ### IV. Input/Output
