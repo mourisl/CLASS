@@ -151,7 +151,7 @@ int main( int argc, char *argv[] )
 	pthread_cond_init( &clearSolveRegionCond, NULL ) ;
 
 	// Output the command lines
-	printf( "#CLASS_v2.1.5\n#" ) ;
+	printf( "#CLASS_v2.1.6\n#" ) ;
 	for ( i = 0 ; i < argc - 1 ; ++i )
 	{
 		printf( "%s ", argv[i] ) ;

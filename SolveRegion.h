@@ -28,7 +28,7 @@
 struct _point
 { 
 	int pos ;
-	int strand ; // 0-negative, 1-positive
+	int strand ; // 0-negative, 1-positive, -1-not sure.
 	int support ; // The # of reads that supports this point.
 	int merge ; // Which point does this point merged to for each strand
 	int strong ; // -1, not a splice point. 0-soft splice point, 1-strong splice point

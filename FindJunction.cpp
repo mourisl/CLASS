@@ -491,6 +491,37 @@ bool CompareJunctions( int startLocation, char *cigar )
 		}
 	}
 
+	// Filter low complex alignment.
+	// Only applies this to alignments does not have a strand information.
+	if ( strand == '?' )
+	{
+		int softStart = -1 ;
+		int softEnd = 0 ;
+		if ( cigarSeg[0].type == 'S' )
+			softStart = cigarSeg[0].len ;
+		if ( cigarSeg[ ccnt - 1 ].type == 'S' )
+			softEnd = cigarSeg[ ccnt - 1 ].len ;
+		int readLen = strlen( col[9] ) ;
+		int count[5] = { 0, 0, 0, 0, 0 } ;
+		for ( i = softStart + 1 ; i < readLen - softEnd ; ++i )
+		{
+			switch ( col[9][i] )
+			{
+				case 'A': ++count[0] ; break ;
+				case 'C': ++count[1] ; break ;
+				case 'G': ++count[2] ; break ;
+				case 'T': ++count[3] ; break ;
+				default: ++count[4] ; 
+			}
+			int max = 0 ;
+			for ( j = 0 ; j < 5 ; ++j )
+				if ( count[j] > max )
+					max = count[j] ;
+			if ( max > 0.6 * ( readLen - softEnd - softStart - 1 ) )
+				validRead = false ;
+		}
+	}
+
 	// Test whether contradict with mate pair
 	if ( col[6][0] == '=' )
 	{
@@ -785,7 +816,22 @@ int main( int argc, char *argv[] )
 
 			if ( b->core.l_qseq < 20 )
 				continue ;
-	
+			
+			for ( i = 0 ; i < b->core.l_qseq ; ++i )
+			{
+				int bit = bam1_seqi( bam1_seq( b ), i ) ;
+				switch ( bit )
+				{
+					case 1: col[9][i] = 'A' ; break ;
+					case 2: col[9][i] = 'A' ; break ;
+					case 4: col[9][i] = 'A' ; break ;
+					case 8: col[9][i] = 'A' ; break ;
+					case 15: col[9][i] = 'N' ; break ;
+					default: col[9][i] = 'A' ; break ;
+				}	
+			}
+			col[9][i] = '\0' ;
+
 			/*if ( flag & 0x100 )
 				secondary = true ;
 			else 
@@ -856,15 +902,17 @@ int main( int argc, char *argv[] )
 			if ( bam_aux_get( b, "XS" ) )
 				strand = bam_aux2A( bam_aux_get( b, "XS" ) ) ;
 			else
-				strand = '+' ;
+				strand = '?' ;
 			startLocation = b->core.pos + 1 ;
 		}
 		else
 		{
 			if ( strstr( line, "XS:A:-" ) ) // on negative strand
 				strand = '-' ;
-			else
+			else if ( strstr( line, "XS:A:+" ) )
 				strand = '+' ;
+			else
+				strand = '?' ;
 			startLocation = atoi( col[3] ) ;  
 		}
 		// Found the junctions from the read.

@@ -1863,6 +1863,52 @@ exit( 1 ) ;
 		geneCnt = 0 ;
 		SearchGene( i, gene, geneCnt, groups, gvisited, 0 ) ;
 
+		// Fill in the strand information for non-canonical splice sites.
+		int prevMainStrand = 1 ;
+		for ( j = 0 ; j < geneCnt ; ++j )
+		{
+			int strandSupport = 0 ;
+			for ( k = groups[ gene[j] ].a ; k <= groups[ gene[j] ].b ; ++k )
+			{ 
+				if ( splices[k].strand >= 0 )
+					strandSupport += ( 2 * splices[k].strand - 1 ) * splices[k].support ;
+			}
+			groupGeneId[ gene[j] ] = strandSupport ; // reuse this array to hold temporary strand information
+		}
+
+		for ( j = 0 ; j < geneCnt ; ++j )
+		{
+			int groupStrand ;
+			if ( groupGeneId[ gene[j] ] != 0 )
+				groupStrand = groupGeneId[ gene[j] ] > 0 ? 1 : 0 ;
+			else
+			{
+				for ( k = 1 ; k < geneCnt ; ++k )
+				{
+					if ( j - k < 0 && j + k >= geneCnt )
+						break ;
+					if ( j + k < geneCnt )
+					{
+						if ( groupGeneId[ gene[j + k ] ] != 0 )
+							groupStrand = groupGeneId[ gene[j + k] ] > 0 ? 1 : 0 ;
+					}
+					if ( j - k >= 0 )
+					{
+						if ( groupGeneId[ gene[j - k ] ] != 0 )
+							groupStrand = groupGeneId[ gene[j - k] ] > 0 ? 1 : 0 ;
+					}
+				}
+			}
+			// If all the introns in the gene are non-canonical, we just assign them to plus strand.
+			if ( groupStrand == -1 )
+				groupStrand = 1 ;
+			for ( k = groups[ gene[j] ].a ; k <= groups[ gene[j] ].b ; ++k )
+			{
+				if ( splices[k].strand == -1 )
+					splices[k].strand = groupStrand ;	
+			}
+		}
+
 		mins = scnt + 10 ;
 		maxs = -1 ;
 		for ( j = 0 ; j < geneCnt ; ++j )
@@ -1876,6 +1922,7 @@ exit( 1 ) ;
 		DetermineRegions( chrom, mins, maxs ) ;
 		solvedSpliceId = maxs ;
 	}
+	memset( groupGeneId, -1, sizeof( int ) * gcnt ) ;
 
 	/*for ( i = 0 ; i < scnt ; ++i )
 	{
@@ -2288,7 +2335,14 @@ int GetSplices( char *chrom, struct _evidence *evidences, int &eviCnt )
 
 		splices[0].pos = inStart ;
 		splices[0].type = 0 ;
-		splices[0].strand = inStrand[0] == '-' ? 0 : 1 ;
+		//splices[0].strand = inStrand[0] == '-' ? 0 : 1 ;
+		if ( inStrand[0] == '-' )
+			splices[0].strand = 0 ;
+		else if ( inStrand[0] == '+' )
+			splices[0].strand = 1 ;
+		else
+			splices[0].strand = -1 ;
+
 		splices[0].support = inSupport ;
 		splices[0].otherPos = inEnd ;
 		splices[0].uniqSupport = inUniqSupport ;
@@ -2359,7 +2413,13 @@ int GetSplices( char *chrom, struct _evidence *evidences, int &eviCnt )
 		}
 		splices[i + 1].pos = inStart ;
 		splices[i + 1].type = 0 ;
-		splices[i + 1].strand = inStrand[0] == '-' ? 0 : 1 ;
+		//splices[i + 1].strand = inStrand[0] == '-' ? 0 : 1 ;
+		if ( inStrand[0] == '-' )
+			splices[i + 1].strand = 0 ;
+		else if ( inStrand[0] == '+' )
+			splices[i + 1].strand = 1 ;
+		else
+			splices[i + 1].strand = -1 ;
 		splices[i + 1].support = inSupport ;
 		splices[i + 1].uniqSupport = inUniqSupport ;
 		splices[i + 1].secSupport = inSecondarySupport ;
@@ -2376,7 +2436,7 @@ int GetSplices( char *chrom, struct _evidence *evidences, int &eviCnt )
 		}
 		splices[i + 1].pos = inEnd ;
 		splices[i + 1].type = 1 ;
-		splices[i + 1].strand = inStrand[0] == '-' ? 0 : 1 ;
+		splices[i + 1].strand = splices[a].strand ; //inStrand[0] == '-' ? 0 : 1 ;
 		splices[i + 1].support = inSupport ;
 		splices[i + 1].uniqSupport = inUniqSupport ;
 		splices[i + 1].secSupport = inSecondarySupport ;

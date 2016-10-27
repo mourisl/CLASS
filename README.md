@@ -1,4 +1,5 @@
 CLASS - Constraint-based Local Assembly and Selection of Splice variants
+========================================================================
 
 Described in: 
  
@@ -14,18 +15,18 @@ Copyright (C) 2012-2013, and GNU GPL, by Li Song, Liliana Florea
 Includes portions copyright from:
 
 lp_solve - Copyright (C) 2005, and GNU LGPL, by Michel Berkelaar, Kjell Eikland, Peter Notebaert
-SAMtools - Copyright (C) 2008-2009, Genome Research Ltd, Heng Li 
-=============================================================
+SAMtools - Copyright (C) 2008-2009, Genome Research Ltd, Heng Li
 
-Content:
+### Content:
 I.   What is CLASS?
-II.  Usage
-III. Input/Output
-IV.  Example
-V.   Terms of use
-VI.  Support
+II.  Install
+III.  Usage
+IV. Input/Output
+V.  Example
+VI.   Terms of use
+VII.  Support
 
-I.   What is CLASS?
+### I.   What is CLASS?
 
 CLASS is a tool for assembling transcripts from short RNA-seq reads
 aligned to a reference genome. It works in three stages. Stage 1 makes
@@ -36,7 +37,12 @@ selects a subset of the candidate transcripts encoded in the graph,
 according to the constraints derived from mate pairs and spliced alignments
 and, optionally, using knowledge about gene structure extracted from known annotation and/or alignments of cDNA sequences.
 
-II.  Usage
+### II. Install
+Run: % sh build.sh
+
+The software is compiled in place
+
+### III.  Usage
 Usage: perl run_class.pl [options]
 Options:
 	-a alignment_file (REQUIRED): the path to the alignemtn file(in SAM or BAM format)
@@ -53,7 +59,7 @@ Options:
 	--clean: whehter to remove the temporary files in -wd (default: no)
 
 
-III. Input/Output
+### IV. Input/Output
 
 The primary input to CLASS is a set of short read alignments in BAM format
 and sorted by chromosome and position, for instance one produced with
@@ -88,13 +94,13 @@ containing the temporary workind girectory. Also, since the depth file will be c
 that directory and will have one row for each base, please ensure that
 sufficient space is available in the work directory.
 
-IV. Example
+### V. Example
 
 We will use the file ./Sample/sample.bam as an example.
 Running "% perl run_class.pl -a ./Sample/sample.bam" will produce a 
 set of transcripts in the file ./sample.gtf . 
  
-V. Terms of use
+### VI. Terms of use
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -111,7 +117,7 @@ Public License along with this program; if not, you can obtain one from
 http://www.gnu.org/licenses/gpl.txt or by writing to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  
-VI. Support
+### VII. Support
 
 Contact us at: lsong10@jhu.edu, florea@jhu.edu
 

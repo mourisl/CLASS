@@ -580,10 +580,13 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 		{
 			if ( bam_aux_get( b, "XS" ) )
 			{
-				if ( bam_aux2A( bam_aux_get( b, "XS" ) ) == '-' )
+				char c = bam_aux2A( bam_aux_get( b, "XS" ) ) ;
+				if ( c == '-' )
 					reads[rcnt].strand = 0 ;
-				else
+				else if ( c == '+' )
 					reads[rcnt].strand = 1 ;
+				else
+					reads[rcnt].strand = -1 ;
 			}
 			else
 			{
@@ -604,6 +607,10 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 		{
 			if ( strstr( line, "XS:A:-" ) )
 				reads[ rcnt ].strand = 0 ;
+			else if ( strstr( line, "XS:A:+" ) )
+				reads[ rcnt ].strand = 1 ;
+			else if ( strstr( line, "XS:A:?" ) )
+				reads[ rcnt ].strand = -1 ;
 			else if ( reads[ rcnt ].scnt > 0 )
 				reads[ rcnt ].strand = 1 ;
 			else
@@ -793,10 +800,13 @@ int ExtractGeneReads( struct _readFile file, char *rchrom, int rstart, int rend,
 		{
 			if ( bam_aux_get( b, "XS" ) )
 			{
-				if ( bam_aux2A( bam_aux_get( b, "XS" ) ) == '-' )
+				char c = bam_aux2A( bam_aux_get( b, "XS" ) ) ;
+				if ( c == '-' )
 					geneReads.reads[tag][offset].strand = 0 ;
-				else
+				else if ( c == '+' )
 					geneReads.reads[tag][offset].strand = 1 ;
+				else
+					geneReads.reads[tag][offset].strand = -1 ;
 			}
 			else
 			{
@@ -822,6 +832,10 @@ int ExtractGeneReads( struct _readFile file, char *rchrom, int rstart, int rend,
 		{
 			if ( strstr( line, "XS:A:-" ) )
 				geneReads.reads[tag][offset].strand = 0 ;
+			else if ( strstr( line, "XS:A:+" ) )
+				geneReads.reads[tag][offset].strand = 1 ;
+			else if ( strstr( line, "XS:A:?" ) )
+				geneReads.reads[tag][offset].strand = -1 ;
 			else if ( geneReads.reads[tag][offset].scnt > 0 )
 				geneReads.reads[tag][offset].strand = 1 ;
 			else
