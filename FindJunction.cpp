@@ -69,6 +69,11 @@ struct _cigarSeg
 
 struct _readTree *contradictedReads ;
 
+char nucToNum[26] = { 0, 4, 1, 4, 4, 4, 2, 
+	4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 3,
+		4, 4, 4, 4, 4, 4 } ;
+
 void PrintHelp()
 {
 	printf( 
@@ -503,7 +508,58 @@ bool CompareJunctions( int startLocation, char *cigar )
 			softEnd = cigarSeg[ ccnt - 1 ].len ;
 		int readLen = strlen( col[9] ) ;
 		int count[5] = { 0, 0, 0, 0, 0 } ;
-		for ( i = softStart + 1 ; i < readLen - softEnd ; ++i )
+		
+		int pos = 0 ;
+		for ( i = 0 ; i < ccnt ; ++i )
+		{
+			switch ( cigarSeg[i].type )
+			{
+				case 'S':
+					pos += cigarSeg[i].len ;
+				case 'M':
+				case 'I':
+					{
+						for ( j = 0 ; j < cigarSeg[i].len ; ++j )
+							++count[ nucToNum[  col[9][pos + j] - 'A' ] ] ;
+						pos += j ;
+					} break ;
+				case 'N':
+					{
+						int max = 0 ;
+						int sum = 0 ;
+						for ( j = 0 ; j < 5 ; ++j )
+						{
+							if ( count[j] > max )
+								max = count[j] ;
+							sum += count[j] ;
+						}
+						if ( max > 0.8 * sum )
+							validRead = false ;
+						count[0] = count[1] = count[2] = count[3] = count[4] = 0 ;
+					} break ;
+				case 'H':
+				case 'P':
+				case 'D':
+				default: break ;
+			}
+		}
+		
+		{
+			int max = 0 ;
+			int sum = 0 ;
+			for ( j = 0 ; j < 5 ; ++j )
+			{
+				if ( count[j] > max )
+					max = count[j] ;
+				sum += count[j] ;
+			}
+			if ( max > 0.8 * sum )
+				validRead = false ;
+			count[0] = count[1] = count[2] = count[3] = count[4] = 0 ;
+		}
+
+		
+		/*for ( i = softStart + 1 ; i < readLen - softEnd ; ++i )
 		{
 			switch ( col[9][i] )
 			{
@@ -519,7 +575,7 @@ bool CompareJunctions( int startLocation, char *cigar )
 			if ( count[j] > max )
 				max = count[j] ;
 		if ( max > 0.6 * ( readLen - softEnd - softStart - 1 ) )
-			validRead = false ;
+			validRead = false ;*/
 	}
 
 	// Test whether contradict with mate pair
