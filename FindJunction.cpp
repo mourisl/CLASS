@@ -513,13 +513,13 @@ bool CompareJunctions( int startLocation, char *cigar )
 				case 'T': ++count[3] ; break ;
 				default: ++count[4] ; 
 			}
-			int max = 0 ;
-			for ( j = 0 ; j < 5 ; ++j )
-				if ( count[j] > max )
-					max = count[j] ;
-			if ( max > 0.6 * ( readLen - softEnd - softStart - 1 ) )
-				validRead = false ;
 		}
+		int max = 0 ;
+		for ( j = 0 ; j < 5 ; ++j )
+			if ( count[j] > max )
+				max = count[j] ;
+		if ( max > 0.6 * ( readLen - softEnd - softStart - 1 ) )
+			validRead = false ;
 	}
 
 	// Test whether contradict with mate pair
@@ -823,9 +823,9 @@ int main( int argc, char *argv[] )
 				switch ( bit )
 				{
 					case 1: col[9][i] = 'A' ; break ;
-					case 2: col[9][i] = 'A' ; break ;
-					case 4: col[9][i] = 'A' ; break ;
-					case 8: col[9][i] = 'A' ; break ;
+					case 2: col[9][i] = 'C' ; break ;
+					case 4: col[9][i] = 'G' ; break ;
+					case 8: col[9][i] = 'T' ; break ;
 					case 15: col[9][i] = 'N' ; break ;
 					default: col[9][i] = 'A' ; break ;
 				}	
