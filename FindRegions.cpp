@@ -1729,6 +1729,7 @@ exit( 1 ) ;
 		bool remove = false ;
 		if ( splices[i].otherInd < i || splices[i].support > 2 || splices[i].otherInd - i == 1 )
 			continue ;
+
 		lcnt = 0 ;
 		rcnt = 0 ;
 		for ( l = i - 1 ; l >= 0 && lcnt < 3 ; --l )
@@ -1816,6 +1817,20 @@ exit( 1 ) ;
 			splices[ splices[i].otherInd ].support = -1 ;
 		}
 	}
+
+	// Remove the splice sites with no strand information if the support is weak
+	for ( i = 0 ; i < scnt ; ++i )
+	{
+		if ( splices[i].support <= 0 || splices[i].strand >= 0 )
+			continue ;
+
+		if ( splices[i].uniqSupport < 0.05 * ( splices[i].uniqSupport + splices[i].secSupport ) )
+		{
+			splices[i].support = -1 ;
+			splices[ splices[i].otherInd ].support = -1 ;
+		}
+	}
+
 	k = 0 ;
 	for ( i = 0 ; i < scnt ; ++i )
 	{
@@ -2486,7 +2501,10 @@ int GetSplices( char *chrom, struct _evidence *evidences, int &eviCnt )
 		eviCnt = -1 ;
 	TTS_Read( chrom ) ;
 	if ( VERBOSE )
+	{
 		printf( "Preprocessing %s\n", chrom ) ;
+		fflush( stdout ) ;
+	}
 	
 	seCnt = 0 ;
 	noiseCnt = 0 ;
@@ -2507,7 +2525,7 @@ int FindPossibleNext( char *chrom, struct _splice ret_splices[], int &spliceCnt,
 	int i, j, k ;
 	static int usedScnt = 0 ;
 	static int usedSingleExon = 0 ;
-	static char curChrom[50] ;
+	static char curChrom[50] = "" ;
 	if ( usedScnt >= scnt && usedSingleExon >= seCnt && strcmp( curChrom, "-2" ) )
 	{
 		strcpy( curChrom, "-2" ) ;

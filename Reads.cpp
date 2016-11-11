@@ -399,6 +399,9 @@ int SearchGeneHash( struct _geneRead geneReads, char *id, int index, int timeSta
 
 int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, struct _read reads[], int extent[2] ) 
 {
+	if ( !strcmp( rchrom, "-2" ) )
+		return 0 ;
+	
 	char readid[ID_LENGTH], chrom[50], mapq[10], cigar[1000], mateChrom[50] ;
 	int start, mstart, flag ; // read start and mate read start
 	bool first = true ;
@@ -695,6 +698,8 @@ int ExtractGeneReads( struct _readFile file, char *rchrom, int rstart, int rend,
 	bool secondary = false ;
 
 	bam1_t *b = NULL ;
+	if ( !strcmp( rchrom, "-2" ) )
+		return 0 ;
 	if ( rend < rstart )
 		return 0 ;
 	static int timeStamp = 0 ;

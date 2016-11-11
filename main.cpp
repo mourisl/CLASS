@@ -261,10 +261,10 @@ int main( int argc, char *argv[] )
 	SplicesInformation_Init() ;
 
 	if ( VERBOSE )
-		printf( "Getting alignments information.\n" ) ;
+		printf( "# Getting alignments information.\n" ) ;
 	GetReadsInfo( fpReads, READS_LENGTH, FRAG_LENGTH, FRAG_STD, TOTAL_READ_COUNT ) ;
 	if ( VERBOSE )
-		printf( "Alignments information of %d reads: Read_Length=%d Fragment_Length=%d Fragment_Stddev=%d\n",
+		printf( "# Alignments information of %d reads: Read_Length=%d Fragment_Length=%d Fragment_Stddev=%d\n",
 				TOTAL_READ_COUNT, READS_LENGTH, FRAG_LENGTH, FRAG_STD ) ;
 
 	fpReads = OpenReadFile( argv[1] ) ;
@@ -371,7 +371,7 @@ int main( int argc, char *argv[] )
 		}
 		if ( VERBOSE )
 		{
-			printf( "Solving region: %s %d %d (%d exons so far)\n", chrom, start, end, exonCnt ) ; 	
+			printf( "# Solving region: %s %d %d (%d exons so far)\n", chrom, start, end, exonCnt ) ; 	
 			fflush( stdout ) ;
 		}
 		//fpOneComb = fopen( "one_right_comb.out", "w" ) ;	
@@ -422,6 +422,11 @@ int main( int argc, char *argv[] )
 		}
 		int extent[2] ;
 		readCnt = ExtractReads( fpReads, chrom, start, end, reads, extent ) ;
+		if ( VERBOSE )
+		{
+			printf( "# Found %d reads in this region.\n", readCnt ) ; 	
+			fflush( stdout ) ;
+		}
 		//printf( "readcnt: %d\n", readCnt ) ;
 		//if ( start > 9908278 )
 		//	return 0 ;
@@ -522,6 +527,11 @@ int main( int argc, char *argv[] )
 			//for ( i = 0 ; i < exonCnt ; ++i )
 			//	printf( "%d %d %d\n", exons[i].start, exons[i].end, exons[i].strand ) ;
 		}
+		if ( VERBOSE )
+		{
+			printf( "# Finish solving region: %s %d %d (%d exons so far)\n", chrom, start, end, exonCnt ) ; 	
+			fflush( stdout ) ;
+		}
 		//if ( exons[ exonCnt - 1 ].start >= 10000000 )
 		//	break ;
 		/*if ( tmp == exonCnt )
@@ -561,14 +571,14 @@ int main( int argc, char *argv[] )
 			for ( i = 0 ; i < exonCnt ; ++i )
 			{
 				printf( "Exon %d: %s %d %d\n", i, preChrom, exons[i].start, exons[i].end ) ;
-				printf( "\t# of splice sites before %d: ", exons[i].pcnt ) ;
+				/*printf( "\t# of splice sites before %d: ", exons[i].pcnt ) ;
 				for ( j = 0 ; j < exons[i].pcnt ; ++j )
 					printf( "%d ", exons[i].prev[j] ) ;
 				printf( "\n" ) ;
 				printf( "\t# of splice sites after %d: ", exons[i].ncnt ) ;
 				for ( j = 0 ; j < exons[i].ncnt ; ++j )
 					printf( "%d ", exons[i].next[j] ) ;
-				printf( "\n") ;
+				printf( "\n") ;*/
 			}
 		}
 		fflush( stdout ) ;
