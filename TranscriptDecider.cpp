@@ -4573,7 +4573,7 @@ void SolveGene( char *chrom, struct _exonNode nodes[], struct _exon exons[], int
 
 	if ( VERBOSE )
 	{
-		printf( "Assembling from %d to %d, which have %d exons, %d constraints.\n", 
+		printf( "# Assembling from %d to %d, which have %d exons, %d constraints.\n", 
 			exons[from].start, transcriptEnd, to - from + 1, tcCnt ) ;
 		fflush( stdout ) ;
 	}

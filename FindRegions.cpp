@@ -2502,7 +2502,7 @@ int GetSplices( char *chrom, struct _evidence *evidences, int &eviCnt )
 	TTS_Read( chrom ) ;
 	if ( VERBOSE )
 	{
-		printf( "Preprocessing %s\n", chrom ) ;
+		printf( "# Preprocessing %s\n", chrom ) ;
 		fflush( stdout ) ;
 	}
 	

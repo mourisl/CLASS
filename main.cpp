@@ -327,10 +327,10 @@ int main( int argc, char *argv[] )
 				//	printf( "### %s %d\n", preChrom, exonCnt ) ;
 				if ( VERBOSE )
 				{
-					printf( "Found %d exons in %s.\n", exonCnt, preChrom ) ;
+					printf( "# Found %d exons in %s.\n", exonCnt, preChrom ) ;
 					for ( i = 0 ; i < exonCnt ; ++i )
 					{
-						printf( "Exon %d: %s %d %d\n", i, preChrom, exons[i].start, exons[i].end ) ;
+						printf( "# Exon %d: %s %d %d\n", i, preChrom, exons[i].start, exons[i].end ) ;
 						/*printf( "\t# of splice sites before %d: ", exons[i].pcnt ) ;
 						for ( j = 0 ; j < exons[i].pcnt ; ++j )
 							printf( "%d ", exons[i].prev[j] ) ;
@@ -365,10 +365,10 @@ int main( int argc, char *argv[] )
 			strcpy( preChrom, chrom ) ;
 			SplicesInformation_Reset() ;
 			exonCnt = 0 ;
-
-			if ( !strcmp( chrom, "-2" ) )
-				continue ;
 		}
+		if ( !strcmp( chrom, "-2" ) )
+			continue ;
+
 		if ( VERBOSE )
 		{
 			printf( "# Solving region: %s %d %d (%d exons so far)\n", chrom, start, end, exonCnt ) ; 	
@@ -567,10 +567,10 @@ int main( int argc, char *argv[] )
 	{
 		if ( VERBOSE )
 		{
-			printf( "Found %d exons in %s.\n", exonCnt, preChrom ) ;
+			printf( "# Found %d exons in %s.\n", exonCnt, preChrom ) ;
 			for ( i = 0 ; i < exonCnt ; ++i )
 			{
-				printf( "Exon %d: %s %d %d\n", i, preChrom, exons[i].start, exons[i].end ) ;
+				printf( "# Exon %d: %s %d %d\n", i, preChrom, exons[i].start, exons[i].end ) ;
 				/*printf( "\t# of splice sites before %d: ", exons[i].pcnt ) ;
 				for ( j = 0 ; j < exons[i].pcnt ; ++j )
 					printf( "%d ", exons[i].prev[j] ) ;
@@ -610,7 +610,7 @@ int main( int argc, char *argv[] )
 
 	if ( VERBOSE )
 	{
-		printf( "CLASS finishes successfully with %lf seconds.\n", timeval_subtract( &elapsedTime, &endTime, &beginTime ) ) ;
+		printf( "# CLASS finishes successfully with %lf seconds.\n", timeval_subtract( &elapsedTime, &endTime, &beginTime ) ) ;
 	}
 	return 0 ;
 
