@@ -158,10 +158,18 @@ void GetReadsInfo( struct _readFile file, int &readsLen, int &fragLen, int &frag
 			readsLen = lens[i][0] ;
 		}*/
 	qsort( lens, k, sizeof( int ), CompInt ) ;
+	//if ( !VAR_RD_LEN )
+	//	readsLen = lens[ k / 2 ] ;
+	//else
+	//	readsLen = lens[k - 1] ;
+	readsLen = lens[k - 1] ;
 	if ( !VAR_RD_LEN )
-		readsLen = lens[ k / 2 ] ;
-	else
-		readsLen = lens[k - 1] ;
+	{
+		if ( lens[k-1] != lens[int( k*0.1 ) ] )
+		{
+			VAR_RD_LEN= true ;
+		}
+	}
 
 	long long sum = 0 ;
 	long long sumsq = 0 ;
