@@ -13,7 +13,7 @@ char samLine[65537] ;
 char seq[65537] ;
 
 char nucToNum[26] = { 0, -1, 1, -1, -1, -1, 2,
-			-1, -1, -1, -1, -1, -1, -1,
+			-1, -1, -1, -1, -1, -1, 0, // Regard 'N' as 'A' 
 			-1, -1, -1, -1, -1, 3,
 			-1, -1, -1, -1, -1, -1 } ;
 char numToNuc[26] = {'A', 'C', 'G', 'T'} ;
@@ -136,6 +136,21 @@ public:
 	}
 } ;
 
+void ReverseComplement( char *s, int l ) 
+{
+	int u, v ;
+	for ( u = 0, v = l - 1 ; u <= v ; ++u, --v )
+	{
+		char tmp ;
+		tmp = s[v] ;
+		s[v] = s[u] ;
+		s[u] = tmp ;
+
+		s[u] = numToNuc[ 3 - nucToNum[ s[u] - 'A' ] ] ;
+		s[v] = numToNuc[ 3 - nucToNum[ s[v] - 'A' ] ] ;
+	}
+}
+
 
 int main( int argc, char *argv[] )
 {
@@ -145,9 +160,14 @@ int main( int argc, char *argv[] )
 	std::map<std::string, int> chrToChrId ;
 
 	char readid[200], chrom[50], mapq[10], cigar[1000], mateChrom[50] ;
+	char buffer[1024] ;
+	char pattern[1024] ;
 	int start, mstart, flag, tlen ; // read start and mate read start
+	int seqLen ;
 	int chrCnt = 0 ;
 	int chrId ;
+	int width = 7 ;
+	int score ;
 
 	if ( argc < 2 )
 	{
@@ -245,9 +265,13 @@ int main( int argc, char *argv[] )
 		
 		sscanf( samLine, "%s %d %s %d %s %s %s %d %d %s", readid, &flag, chrom, &start, mapq, cigar, mateChrom, &mstart, &tlen, seq ) ;
 		struct _pair segments[1000] ;
+		struct _pair seqSegments[1000] ; // the segments with respect to the sequence.
 		int segCnt = 0 ;
+		int seqSegCnt = 0 ;
 		int num = 0 ;
 		int len = 0 ;
+		
+		score = 0 ;
 	
 		for ( i = 0 ; cigar[i] ; ++i )
 		{
@@ -274,7 +298,8 @@ int main( int argc, char *argv[] )
 				num = 0 ;
 			}
 		}
-		
+	
+
 		if ( len > 0 )
 		{
 			segments[segCnt].a = start ;
@@ -295,13 +320,16 @@ int main( int argc, char *argv[] )
 		len = strlen( samLine ) ;
 		samLine[len - 1] = '\0' ;
 		int motif = 0 ;
+		
+		BitSequence &chrSeq = genome[ chrId ] ;
+
 		for ( i = 0 ; i < segCnt - 1 ; ++i )
 		{
 			char m[4] ;
-			m[0] = genome[ chrId ].Get( segments[i].b + 1 - 1  ) ;
-			m[1] = genome[ chrId ].Get( segments[i].b + 2 - 1 ) ;
-			m[2] = genome[ chrId ].Get( segments[i + 1].a - 2 - 1 ) ;
-			m[3] = genome[ chrId ].Get( segments[i + 1].a - 1 - 1 ) ;
+			m[0] = chrSeq.Get( segments[i].b + 1 - 1  ) ;
+			m[1] = chrSeq.Get( segments[i].b + 2 - 1 ) ;
+			m[2] = chrSeq.Get( segments[i + 1].a - 2 - 1 ) ;
+			m[3] = chrSeq.Get( segments[i + 1].a - 1 - 1 ) ;
 			motif = 0 ;
 			for ( j = 0 ; j < 4 ; ++j )
 				motif = ( motif << 2 ) + ( nucToNum[ m[j] - 'A' ] & 3 );
@@ -312,16 +340,205 @@ int main( int argc, char *argv[] )
 		if ( strand == 1 )
 		{
 			printf( "%s\tXS:A:+\n", samLine ) ;
+			continue ;
 		}
 		else if ( strand == 0 )
 		{
 			printf( "%s\tXS:A:-\n", samLine ) ;
+			continue ;
 		}
-		else
+
+		char *p ;
+		if ( ( p = strstr( samLine, "NH:i:" ) ) != NULL )
 		{
-			printf( "%s\tXS:A:?\n", samLine ) ;
+			p += 5 ;
+			num = 0 ;
+			while ( *p >= '0' && *p <= '9' )
+			{
+				num = num * 10 + *p - '0' ;
+				++p ;
+			}
+			if ( num > 1 )
+				score |= 1 ;
 		}
+		
+		seqLen = strlen( seq ) ;
+		for ( i = 0 ; i < seqLen ; ++i )
+			if ( seq[i] == 'N' )
+			{
+				score |= 1 ;
+				break ;
+			}
+
+		num = 0 ;
+		len = 0 ;
+		seqSegCnt = 0 ;
+		start = 0 ;
+		for ( i = 0 ; cigar[i] ; ++i )
+		{
+			if ( cigar[i] >= '0' && cigar[i] <= '9' )
+				num = num * 10 + cigar[i] - '0' ;
+			else if ( cigar[i] == 'D' || cigar[i] == 'S' || cigar[i] == 'H'
+				|| cigar[i] == 'P' )
+			{
+				num = 0 ;
+			}
+			else if ( cigar[i] == 'N' )
+			{
+				seqSegments[seqSegCnt].a = start ;
+				seqSegments[seqSegCnt].b = start + len - 1 ;
+				++seqSegCnt ;
+				
+				start = start + len ;
+				len = 0 ;
+				num = 0 ;
+			}
+			else
+			{
+				len += num ;
+				num = 0 ;
+			}
+		}
+		if ( len > 0 )
+		{
+			seqSegments[seqSegCnt].a = start ;
+			seqSegments[seqSegCnt].b = start + len - 1 ;
+			++seqSegCnt ;
+		}
+
+		for ( i = 0 ; i < segCnt - 1 ; ++i )
+		{
+			for ( j = -width ; j < width ; ++j )
+			{
+				if ( segments[i].b + j < segments[i].a || segments[i+1].a + j > segments[i+1].b )
+					continue ;
+				// Look for the splice signal.
+				char m[4] ;
+				m[0] = chrSeq.Get( segments[i].b + j + 1 - 1  ) ;
+				m[1] = chrSeq.Get( segments[i].b + j + 2 - 1 ) ;
+				m[2] = chrSeq.Get( segments[i + 1].a + j - 2 - 1 ) ;
+				m[3] = chrSeq.Get( segments[i + 1].a + j - 1 - 1 ) ;
+				motif = 0 ;
+				for ( k = 0 ; k < 4 ; ++k )
+					motif = ( motif << 2 ) + ( nucToNum[ m[k] - 'A' ] & 3 );
+				strand = motifStrand[ motif ] ;
+				if ( strand == -1 )
+					continue ;
+
+				// We found a signal, then test whether we can shift the intron.
+				// Extract the sequence from the reference genome.
+				int l = 0 ;
+				if ( j < 0 )
+					for ( k = segments[i + 1].a + j, l = 0 ; k <= segments[i + 1].a - 1 ; ++k, ++l )					
+						buffer[l] = chrSeq.Get( k - 1 ) ;
+				else
+					for ( k = segments[i].b + 1, l= 0  ; k <= segments[i].b + j ; ++k, ++l )
+						buffer[l] = chrSeq.Get(k - 1) ;
+				buffer[l] = '\0' ;
+
+				// Get the coordinate on the sequence.
+				int tag ;
+				int useBegin = 0 ; // is the portion from the beginning part of a seqSegment?
+				int from, to ;
+				if ( j < 0 )
+				{
+					tag = i ;
+					useBegin = 0 ;
+				}
+				else // j>0
+				{
+					tag = i + 1 ;
+					useBegin = 1 ;
+				}
+				
+				if ( flag & 0x10 != 0 )
+				{
+					tag = segCnt - 1 - tag ;
+					useBegin = 1 - useBegin ;
+				
+					ReverseComplement( buffer, l ) ;
+					
+				}
+
+				if ( useBegin )
+				{
+					from = seqSegments[tag].a ;
+					to = seqSegments[tag].a + l - 1 ;
+				}
+				else
+				{
+					from = seqSegments[tag].b - l + 1 ;
+					to = seqSegments[tag].b ;
+				}
+
+				for ( k = 0 ; k < l ; ++k )
+				{
+					if ( seq[from + k] != buffer[k] )
+						break ;
+				}
+				
+
+				if ( k >= l )
+				{
+					// We can shift the intron
+					score |= 2 ;
+					break ;
+				}
+			}
+			if ( j < width )
+				break ;
+		}
+
+		// Check whether the sequence is low-complexity. To do this, we test whether we can shift the seqSegments and directly inspect the sequence.
+		for ( i = 0 ; i < seqSegCnt ; ++i )
+		{
+			int l ;
+			for ( k = 0, j = seqSegments[i].a - width ; j <= seqSegments[i].b + width ; ++j, ++k )
+				buffer[k] = chrSeq.Get( j ) ;
+			buffer[k] = '0' ;
+			
+			for ( l = 0, j = seqSegments[i].a ; j <= seqSegments[i].b ; ++j, ++l )
+			{
+				pattern[l] = seq[j] ;		
+			}
+			pattern[l] = '\0' ;
+
+			if ( flag & 0x10 != 0 )
+				ReverseComplement( pattern, l ) ;
+			char *p = buffer ;
+			int cnt = 0 ;
+			while ( ( p = strstr( p, pattern ) ) != NULL )
+			{
+				++cnt ;
+				++p ;
+			}
+			if ( cnt > 1 )
+			{
+				score |= 4 ;
+				break ;
+			}
+
+			int count[5] = { 0, 0, 0, 0, 0 } ;
+			int max = 0 ;
+			for ( j = 0 ; j < l ; ++j )
+			{
+				++count[ nucToNum[ pattern[j] - 'A' ] ] ; 	
+			}
+
+			for ( j = 0 ; j < 5 ; ++j )
+			{
+				if ( count[j] > max )
+					max = count[j] ;
+			}
+			if ( max > 0.8 * l )
+			{
+				score |= 4 ;
+				break ;
+			}
+		}
+
+		printf( "%s\tXS:A:?\tYS:i:%d\n", samLine, score ) ;
 	}
-	
+
 	return 0 ;
 }

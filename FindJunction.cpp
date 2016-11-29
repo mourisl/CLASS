@@ -44,10 +44,12 @@ struct _junction
 char line[LINE_SIZE] ;
 char col[11][LINE_SIZE] ; // The option fields is not needed.
 char strand ; // Extract XS field
+char noncanonStrandInfo ;
 //bool secondary ;
 int NH ;
 int editDistance ;
 int mateStart ;
+int filterYS ;
 
 struct _junction junctionQueue[QUEUE_SIZE] ; // Expected only a few junctions in it for each read. This queue is sorted.
 
@@ -82,6 +84,7 @@ void PrintHelp()
 		"Options:\n"
 	    "\t-j xx [-B]: Output the junctions using 1-based coordinates. The format is \"reference id\" start end \"# of read\" strand.(They are sorted)\n and the xx is an integer means the maximum unqualified anchor length for a splice junction(default=8). If -B, the splice junction must be supported by a read whose both anchors are longer than xx.\n"
 	    "\t-a: Output all the junctions, and use non-positive support number to indicate unqualified junctions.\n"
+	    "\t-y: If the bits from YS field of bam matches the argument, we filter the alignment (default: 4).\n"
 	      ) ;
 }
 
@@ -500,51 +503,57 @@ bool CompareJunctions( int startLocation, char *cigar )
 	// Only applies this to alignments does not have a strand information.
 	if ( strand == '?' )
 	{
-		int softStart = -1 ;
-		int softEnd = 0 ;
-		if ( cigarSeg[0].type == 'S' )
-			softStart = cigarSeg[0].len ;
-		if ( cigarSeg[ ccnt - 1 ].type == 'S' )
-			softEnd = cigarSeg[ ccnt - 1 ].len ;
-		int readLen = strlen( col[9] ) ;
-		int count[5] = { 0, 0, 0, 0, 0 } ;
-		
-		int pos = 0 ;
-		for ( i = 0 ; i < ccnt ; ++i )
+		if ( noncanonStrandInfo != -1 )
 		{
-			switch ( cigarSeg[i].type )
-			{
-				case 'S':
-					pos += cigarSeg[i].len ;
-				case 'M':
-				case 'I':
-					{
-						for ( j = 0 ; j < cigarSeg[i].len ; ++j )
-							++count[ nucToNum[  col[9][pos + j] - 'A' ] ] ;
-						pos += j ;
-					} break ;
-				case 'N':
-					{
-						int max = 0 ;
-						int sum = 0 ;
-						for ( j = 0 ; j < 5 ; ++j )
-						{
-							if ( count[j] > max )
-								max = count[j] ;
-							sum += count[j] ;
-						}
-						if ( max > 0.8 * sum )
-							validRead = false ;
-						count[0] = count[1] = count[2] = count[3] = count[4] = 0 ;
-					} break ;
-				case 'H':
-				case 'P':
-				case 'D':
-				default: break ;
-			}
+			if ( ( noncanonStrandInfo & filterYS ) != 0 )
+				validRead = false ;		
 		}
-		
+		else
 		{
+			int softStart = -1 ;
+			int softEnd = 0 ;
+			if ( cigarSeg[0].type == 'S' )
+				softStart = cigarSeg[0].len ;
+			if ( cigarSeg[ ccnt - 1 ].type == 'S' )
+				softEnd = cigarSeg[ ccnt - 1 ].len ;
+			int readLen = strlen( col[9] ) ;
+			int count[5] = { 0, 0, 0, 0, 0 } ;
+
+			int pos = 0 ;
+			for ( i = 0 ; i < ccnt ; ++i )
+			{
+				switch ( cigarSeg[i].type )
+				{
+					case 'S':
+						pos += cigarSeg[i].len ;
+					case 'M':
+					case 'I':
+						{
+							for ( j = 0 ; j < cigarSeg[i].len ; ++j )
+								++count[ nucToNum[  col[9][pos + j] - 'A' ] ] ;
+							pos += j ;
+						} break ;
+					case 'N':
+						{
+							int max = 0 ;
+							int sum = 0 ;
+							for ( j = 0 ; j < 5 ; ++j )
+							{
+								if ( count[j] > max )
+									max = count[j] ;
+								sum += count[j] ;
+							}
+							if ( max > 0.8 * sum )
+								validRead = false ;
+							count[0] = count[1] = count[2] = count[3] = count[4] = 0 ;
+						} break ;
+					case 'H':
+					case 'P':
+					case 'D':
+					default: break ;
+				}
+			}
+
 			int max = 0 ;
 			int sum = 0 ;
 			for ( j = 0 ; j < 5 ; ++j )
@@ -555,27 +564,27 @@ bool CompareJunctions( int startLocation, char *cigar )
 			}
 			if ( max > 0.8 * sum )
 				validRead = false ;
-			count[0] = count[1] = count[2] = count[3] = count[4] = 0 ;
-		}
+			/*	count[0] = count[1] = count[2] = count[3] = count[4] = 0 ;
 
-		
-		/*for ( i = softStart + 1 ; i < readLen - softEnd ; ++i )
-		{
-			switch ( col[9][i] )
-			{
-				case 'A': ++count[0] ; break ;
-				case 'C': ++count[1] ; break ;
-				case 'G': ++count[2] ; break ;
-				case 'T': ++count[3] ; break ;
-				default: ++count[4] ; 
-			}
+
+			for ( i = softStart + 1 ; i < readLen - softEnd ; ++i )
+			  {
+			  switch ( col[9][i] )
+			  {
+			  case 'A': ++count[0] ; break ;
+			  case 'C': ++count[1] ; break ;
+			  case 'G': ++count[2] ; break ;
+			  case 'T': ++count[3] ; break ;
+			  default: ++count[4] ; 
+			  }
+			  }
+			  int max = 0 ;
+			  for ( j = 0 ; j < 5 ; ++j )
+			  if ( count[j] > max )
+			  max = count[j] ;
+			  if ( max > 0.6 * ( readLen - softEnd - softStart - 1 ) )
+			  validRead = false ;*/
 		}
-		int max = 0 ;
-		for ( j = 0 ; j < 5 ; ++j )
-			if ( count[j] > max )
-				max = count[j] ;
-		if ( max > 0.6 * ( readLen - softEnd - softStart - 1 ) )
-			validRead = false ;*/
 	}
 
 	// Test whether contradict with mate pair
@@ -746,6 +755,7 @@ int main( int argc, char *argv[] )
 	flagRemove = true ;
 	flagPrintJunction = true ;
 	flank = 8 ;
+	filterYS = 4 ;
 
 	contradictedReads = NULL ;
 	
@@ -781,6 +791,11 @@ int main( int argc, char *argv[] )
 		else if ( !strcmp( argv[i], "--strict" ) )
 		{
 			flagStrict = true ;
+		}
+		else if ( !strcmp( argv[i], "-y" ) )
+		{
+			filterYS = atoi( argv[i + 1] ) ;
+			++i ;
 		}
 		else if ( i > 1 )
 		{
@@ -956,9 +971,22 @@ int main( int argc, char *argv[] )
 		if ( useSam )
 		{
 			if ( bam_aux_get( b, "XS" ) )
+			{
 				strand = bam_aux2A( bam_aux_get( b, "XS" ) ) ;
+				if ( bam_aux_get( b, "YS" ) )
+				{
+					noncanonStrandInfo = bam_aux2i( bam_aux_get( b, "YS" ) ) ;
+				}
+				else
+				{
+					noncanonStrandInfo = -1 ;
+				}
+			}
 			else
+			{
 				strand = '?' ;
+				noncanonStrandInfo = -1 ;
+			}
 			startLocation = b->core.pos + 1 ;
 		}
 		else
@@ -968,7 +996,17 @@ int main( int argc, char *argv[] )
 			else if ( strstr( line, "XS:A:+" ) )
 				strand = '+' ;
 			else
+			{
 				strand = '?' ;
+				char *p = strstr( line, "YS:i:" ) ;
+				if ( p != NULL )
+				{
+					p += 5 ;
+					noncanonStrandInfo = atoi( p ) ;
+				}
+				else
+					noncanonStrandInfo = -1 ;
+			}
 			startLocation = atoi( col[3] ) ;  
 		}
 		// Found the junctions from the read.
