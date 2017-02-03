@@ -25,7 +25,9 @@ struct _readTree
 	bool valid ;
 	int editDistance ;
 	int NH, cnt ; // if cnt < NH, then it has real secondary match for this splice junction 
-	struct _readTree *left, *right ;	
+	struct _readTree *left, *right ;
+
+	int flag ;// The flag from sam head.
 } ;
 
 // The structure of a junction
@@ -50,6 +52,7 @@ int NH ;
 int editDistance ;
 int mateStart ;
 int filterYS ;
+int samFlag ;
 
 struct _junction junctionQueue[QUEUE_SIZE] ; // Expected only a few junctions in it for each read. This queue is sorted.
 
@@ -95,8 +98,8 @@ void GetJunctionInfo( struct _junction &junc, struct _readTree *p )
 
 	if ( p->valid )
 	{
-		//if ( junc.start == 9220820 + 1 && junc.end == 9303240 - 1 )
-			//printf( "%s %d %d %d\n", p->id, p->leftAnchor, p->rightAnchor, p->secondary ) ;
+		//if ( junc.start == 22381343 + 1 && junc.end == 22904987 - 1 )
+		//	printf( "%s %d %d %d\n", p->id, p->leftAnchor, p->rightAnchor, p->flag ) ;
 		
 
 
@@ -230,6 +233,7 @@ bool InsertReadTree( struct _readTree *p, char *id, int l, int r )
 			p->left->valid = validRead ;
 			p->left->cnt = 1 ;
 			p->left->NH = NH ;
+			p->left->flag = samFlag ;
 			return false ;
 		}
 	}
@@ -249,6 +253,7 @@ bool InsertReadTree( struct _readTree *p, char *id, int l, int r )
 			p->right->valid = validRead ;
 			p->right->cnt = 1 ;
 			p->right->NH = NH ;
+			p->right->flag = samFlag ;
 			return false ;
 		}
 	}
@@ -397,7 +402,8 @@ bool SearchQueue( int start, int end, int prune, int l, int r )
 		{
 			// This alignment is false ;
 			rt = GetReadTreeNode( &junctionQueue[i].head, col[0] ) ;
-			if ( rt != NULL )
+			// the commented out logic because it is handled by contradicted reads
+			if ( rt != NULL ) //&& ( rt->flag & 0x40 ) != ( samFlag & 0x40 ) )
 			{
 				if ( rt->leftAnchor <= flank || rt->rightAnchor <= flank )//|| rt->secondary )
 				{
@@ -419,7 +425,8 @@ bool SearchQueue( int start, int end, int prune, int l, int r )
 		{
 			// This other alignment is false ;
 			rt = GetReadTreeNode( &junctionQueue[i].head, col[0] ) ;
-			if ( rt != NULL )
+			//if ( rt != NULL )
+			if ( rt != NULL ) //&& ( rt->flag & 0x40 ) != ( samFlag & 0x40 ) )
 			{
 				if ( l <= flank || r <= flank )//|| secondary )
 				{
@@ -446,6 +453,10 @@ bool SearchQueue( int start, int end, int prune, int l, int r )
 		if ( junctionQueue[i].start == start && 
 			junctionQueue[i].end == end )
 		{
+			if (junctionQueue[i].strand == '?' && junctionQueue[i].strand != strand )
+			{
+				junctionQueue[i].strand = strand ;
+			}
 			InsertReadTree( &junctionQueue[i].head, col[0], l, r ) ; 
 			return true ;
 		}
@@ -876,6 +887,10 @@ int main( int argc, char *argv[] )
 			{
 				editDistance = bam_aux2i( bam_aux_get( b, "NM" ) ) ;
 			}
+			else if ( bam_aux_get( b, "nM" ) )
+			{
+				editDistance = bam_aux2i( bam_aux_get( b, "nM" ) ) ;
+			}
 			else
 				editDistance = 0 ;
 
@@ -941,7 +956,7 @@ int main( int argc, char *argv[] )
 				//secondary = false ;
 				NH = 1 ;
 			}
-			if ( p = strstr( line, "NM" ) )
+			if ( ( p = strstr( line, "NM" ) ) || ( p = strstr( line, "nM" ) ) )
 			{
 				int k = 0 ;
 				p += 5 ;
@@ -962,6 +977,7 @@ int main( int argc, char *argv[] )
 				secondary = false ;*/
 			
 		}
+		samFlag = flag ;
 		for ( i = 0 ; col[5][i] ; ++i )
 			if ( col[5][i] == 'N' )
 				break ;
@@ -1009,6 +1025,7 @@ int main( int argc, char *argv[] )
 			}
 			startLocation = atoi( col[3] ) ;  
 		}
+		
 		// Found the junctions from the read.
 		if ( strcmp( prevChrome, col[2] ) )
 		{

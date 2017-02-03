@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include <string.h>
+#include <stdlib.h>
 #include <vector>
 #include <map>
 #include <fstream>
@@ -167,7 +168,7 @@ int main( int argc, char *argv[] )
 	int chrCnt = 0 ;
 	int chrId ;
 	int width = 7 ;
-	int score ;
+	int score ; // 0-bit: multiple aligned, 1-bit can shift the intron, 2-bit can shift the alignment, 3-bit contain sequencing error
 
 	if ( argc < 2 )
 	{
@@ -406,6 +407,7 @@ int main( int argc, char *argv[] )
 			++seqSegCnt ;
 		}
 
+		// Check whether we can shift the intron to a canonical splice site
 		for ( i = 0 ; i < segCnt - 1 ; ++i )
 		{
 			for ( j = -width ; j < width ; ++j )
@@ -424,6 +426,7 @@ int main( int argc, char *argv[] )
 				strand = motifStrand[ motif ] ;
 				if ( strand == -1 )
 					continue ;
+				//printf( "%d %d: %d\n", i, j, motif ) ;
 
 				// We found a signal, then test whether we can shift the intron.
 				// Extract the sequence from the reference genome.
@@ -435,6 +438,8 @@ int main( int argc, char *argv[] )
 					for ( k = segments[i].b + 1, l= 0  ; k <= segments[i].b + j ; ++k, ++l )
 						buffer[l] = chrSeq.Get(k - 1) ;
 				buffer[l] = '\0' ;
+
+				//printf( "%s\n", buffer ) ;
 
 				// Get the coordinate on the sequence.
 				int tag ;
@@ -450,14 +455,18 @@ int main( int argc, char *argv[] )
 					tag = i + 1 ;
 					useBegin = 1 ;
 				}
+				//printf( "%d %d\n", tag, useBegin ) ;	
 				
-				if ( flag & 0x10 != 0 )
+				if ( ( flag & 0x10 ) != 0 )
 				{
-					tag = segCnt - 1 - tag ;
-					useBegin = 1 - useBegin ;
-				
-					ReverseComplement( buffer, l ) ;
+					//TODO: it seems star already fliped the sequence.
+					//  is it true for other aligners?
 					
+					//tag = segCnt - 1 - tag ;
+					//useBegin = 1 - useBegin ;
+					
+				
+					//ReverseComplement( buffer, l ) ;
 				}
 
 				if ( useBegin )
@@ -470,6 +479,7 @@ int main( int argc, char *argv[] )
 					from = seqSegments[tag].b - l + 1 ;
 					to = seqSegments[tag].b ;
 				}
+				//printf( "%d %d %d\n", tag, from, to ) ;
 
 				for ( k = 0 ; k < l ; ++k )
 				{
@@ -503,8 +513,11 @@ int main( int argc, char *argv[] )
 			}
 			pattern[l] = '\0' ;
 
-			if ( flag & 0x10 != 0 )
-				ReverseComplement( pattern, l ) ;
+			// It seems the aligner already flipped the read in its output?
+			//if ( flag & 0x10 != 0 )
+			//	ReverseComplement( pattern, l ) ;
+			
+			
 			char *p = buffer ;
 			int cnt = 0 ;
 			while ( ( p = strstr( p, pattern ) ) != NULL )
@@ -534,6 +547,32 @@ int main( int argc, char *argv[] )
 			{
 				score |= 4 ;
 				break ;
+			}
+		}
+
+		if ( ( p = strstr( samLine, "NM:i:" ) ) != NULL || ( p = strstr( samLine, "nM:i:" ) ) != NULL )
+		{
+			int nm = atoi( p + 5 ) ;
+			if ( nm > 0 )
+			{
+				score |= 8 ;
+			}
+		}
+		else
+		{
+			// TODO: check the nm by ourself
+		}
+
+		// Check whether the alignment is concordant.
+		if ( ( flag & 0x1 ) != 0 && ( flag & 0x4 ) == 0 )
+		{
+			start = segments[0].a ;
+			if ( strcmp( mateChrom, "=" ) 
+				|| ( flag & 0x10 ) == ( flag & 0x20 ) 
+				|| ( ( flag & 0x10 ) == 0 && ( mstart < start || mstart > start + 2000000 ) ) 
+				|| ( ( flag & 0x10 ) != 0 && ( mstart > start || mstart < start - 2000000 ) ) )
+			{
+				score |= 16 ;
 			}
 		}
 
