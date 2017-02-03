@@ -168,6 +168,7 @@ void GetReadsInfo( struct _readFile file, int &readsLen, int &fragLen, int &frag
 		if ( lens[k-1] != lens[int( k*0.1 ) ] )
 		{
 			VAR_RD_LEN= true ;
+			fprintf( stderr, "var-rd-len option is turned on.\n" ) ;
 		}
 	}
 
