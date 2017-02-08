@@ -25,4 +25,4 @@ TTS.o: TTS.cpp TTS.h
 BitTable.o: BitTable.cpp BitTable.h
 	g++ -O -c BitTable.cpp BitTable.h
 clean:
-	rm *.o *.gch ./class ./junc
+	rm *.o *.gch ./class ./junc ./clnb ./grader ./addXS

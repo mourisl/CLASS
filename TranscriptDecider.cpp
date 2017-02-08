@@ -4662,6 +4662,8 @@ void TranscriptDecider_Go( char *chrom, struct _exon exons[], int exonCnt, struc
 	int visit[500] ;
 	//memset( eidUsedFlag, false, sizeof( eidUsedFlag ) ) ;
 	memset( geneId, -1, sizeof( geneId ) ) ;
+	memset( geneTranscriptId, 0, sizeof( geneTranscriptId ) ) ;
+	
 	euCnt = 0 ;
 	geneIdCnt = 0 ;
 	struct _exonNode *nodes ;

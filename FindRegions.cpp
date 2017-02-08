@@ -433,6 +433,10 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 
 	soft[0] = soft[1] = seStart = seEnd = -1 ;	
 	//seCnt = 0 ;
+
+	if ( isFuture )
+		first = false ;
+
 	while ( 1 )
 	{
 		if ( fret == EOF )
@@ -446,7 +450,62 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 			newChrom[0] = '\0' ;
 		}
 		else
-			fret = fscanf( fpDepth, "%s %d %d", inChrom, &pos, &idepth ) ;
+		{
+			if ( newChrom[0] && strcmp( newChrom, chrom ) && !isFuture )
+			{
+				// This case happens when the remaining splice sites of the chromosome is filter in depth
+				// or a chromosome with no splice sites.
+				//printf( "hi\n") ;
+				int chromId = GetChromIdFromName( chrom ) ;
+				int newChromId = GetChromIdFromName( newChrom ) ;
+				if (  chromId < newChromId )
+				{
+					// the remaining splice sites in this chromsome is filtered in depth file.
+					strcpy( inChrom, chrom ) ;
+					idepth = 100000 ;
+					pos = end + 1 ;
+				}
+				else //if (chromId > newChromId)
+				{
+					// there is a chromosome with no splice sites
+					newChrom[0] = '\0' ;
+					char prevChrom[50] ;
+					strcpy( prevChrom, newChrom ) ;
+					
+					while ( 1 )
+					{
+						fret = fscanf( fpDepth, "%s %d %d", inChrom, &pos, &idepth ) ;
+						if ( fret == EOF )
+							break ;
+						if ( !strcmp( prevChrom, inChrom ) )
+							continue ;
+						else
+						{
+							int inChromId = GetChromIdFromName( inChrom ) ;
+							if ( chromId < inChromId )
+							{
+								strcpy( inChrom, chrom ) ;
+								idepth = 100000 ;
+								pos = end + 1 ;
+								
+								break ;
+							}
+							else if ( chromId == inChromId )
+								break ;
+							else // chromId > inChromId
+							{
+								strcpy( prevChrom, inChrom ) ;
+								continue ;	
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				fret = fscanf( fpDepth, "%s %d %d", inChrom, &pos, &idepth ) ;
+			}
+		}
 
 		if ( fret == EOF )
 		{
@@ -468,6 +527,8 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 			pos = end + 1 ;
 			//break ;
 		}
+		//if ( !isFuture )
+		//	printf( "%d: %s %d %d\n", isFuture, inChrom, pos, idepth ) ;
 
 		if ( idepth )
 			depth = log( (double)idepth ) / log( LOG_BASE ) ; 

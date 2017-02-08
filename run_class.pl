@@ -23,7 +23,7 @@ my $usage = "Usage: perl run_class.pl [options]\n".
 				"\t--set-cover: use set cover to build transcripts from splicing graph (default: no)\n".
 				"\t--verbose: also output the procedure of CLASS (default: no)\n".
 				"\t--wd tempoaray_file_directory: the directory storing the temporary files (default: ./class_tmp)\n".
-				"\t--clean: whehter to remove the temporary files in -wd (default: no)\n";
+				"\t--clean: whether to remove the temporary files in --wd (default: no)\n";
 
 
 # process the parameters

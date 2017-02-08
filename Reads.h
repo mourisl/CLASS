@@ -69,4 +69,7 @@ void InitGeneReads( struct _geneRead *geneReads ) ;
 int ExtractGeneReads( struct _readFile file, char *rchrom, int rstart, int rend, struct _geneRead geneReads, int extent[2] ) ;
 
 void ClearReadHash( struct _geneRead &geneReads ) ;
+
+// The id should be sorted the same way as the coordinate.
+int GetChromIdFromName( const char *s ) ;
 #endif

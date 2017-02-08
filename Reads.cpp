@@ -1,9 +1,13 @@
 #include "Reads.h"
 
+#include <string>
+#include <map>
+
 #define LINE_SIZE 10000
 #define HASH_MAX 1000003 
 
 #define OVERLAP_READS_MAX 100000
+
 
 char line[LINE_SIZE] ;
 struct _readTree hash[HASH_MAX] ; // Dynamic allocated
@@ -14,6 +18,8 @@ int orCnt = 0 ;
 
 extern int READS_LENGTH ;
 extern bool VAR_RD_LEN ;
+
+std::map<std::string, int> chrNameToId ;
 
 void CigarToString( bam1_core_t *c, uint32_t *in_cigar, char *out_cigar )
 {
@@ -58,6 +64,11 @@ struct _readFile OpenReadFile( char *prefix )
 		}
 		ret.sam = true ;
 		fclose( fp ) ;
+		for ( int i = 0 ; i < ret.fpsam->header->n_targets ; ++i )		
+		{
+			std::string s( ret.fpsam->header->target_name[i] ) ;
+			chrNameToId[s] = i ;
+		}
 		return ret ;
 	}
 
@@ -929,3 +940,10 @@ void ClearReadHash( struct _geneRead &geneReads )
 }
 
 
+int GetChromIdFromName( const char *s )
+{
+	std::string ss( s ) ;
+	if ( chrNameToId.find( ss ) == chrNameToId.end() )
+		return -1 ;
+	return chrNameToId[ss] ;
+}
