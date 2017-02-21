@@ -46,7 +46,7 @@ The software is compiled in place
 		-l label: add a prefix and a "_" to the ids in the GTF file (default: not used)
 		-j junction: the path to the splice junction file
 		-e evidence: the path to the evidence files
-		--var-rd-len: extensive variable read lengths, i.e. reads after trimming (default: auto-detection)
+		--var-rd-len: extensive variable read lengths, i.e. reads after trimming (default: auto-detect)
 		--set-cover: use set cover to build transcripts from splicing graph (default: no)
 		--verbose: also output the procedure of CLASS (default: no)
 		--wd tempoaray_file_directory: the directory storing the temporary files (default: ./class_tmp)
