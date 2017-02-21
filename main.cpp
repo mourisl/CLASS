@@ -124,7 +124,7 @@ int main( int argc, char *argv[] )
 				"\t-j junction: the path to the splice junction file\n"
 				"\t-e evidence: the path to the evidence files\n"
 				//"\t-anno annotation: the path to the annoation file. CLASS will only consider the transcript in specified in the set"
-				"\t--var-rd-len: extensive variable read lengths, i.e. reads after trimming (default: no)\n"
+				"\t--var-rd-len: extensive variable read lengths, i.e. reads after trimming (default: auto-detect)\n"
 				"\t--set-cover: use set cover to build transcripts from splicing graph\n"
 				"\t-F f: do not report the transcripts whose abundance level is lower than f*|most expressed transcript| in a gene\n"
 				"\t-l label: add a prefix and a \"_\" to the ids in the GTF file (default: not used)\n"

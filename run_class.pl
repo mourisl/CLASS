@@ -19,7 +19,7 @@ my $usage = "Usage: perl run_class.pl [options]\n".
 				"\t-l label: add a prefix and a \"_\" to the ids in the GTF file (default: not used)\n".
 				"\t-j junction: the path to the splice junction file\n".
 				"\t-e evidence: the path to the evidence files\n".
-				"\t--var-rd-len: extensive variable read lengths, i.e. reads after trimming (default: no)\n".
+				"\t--var-rd-len: extensive variable read lengths, i.e. reads after trimming (default: auto-detect)\n".
 				"\t--set-cover: use set cover to build transcripts from splicing graph (default: no)\n".
 				"\t--verbose: also output the procedure of CLASS (default: no)\n".
 				"\t--wd tempoaray_file_directory: the directory storing the temporary files (default: ./class_tmp)\n".
