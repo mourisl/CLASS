@@ -409,7 +409,8 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 	else
 		CUT_THRESHOLD = 1 ;
 
-	//printf( "%s %d %d\n", chrom, start, end ) ;
+	//if ( !isFuture )
+	//	printf( "IsInExon: %s %d %d\n", chrom, start, end ) ;
 	/*if ( end < start + CUT_MERGE )
 	{
 		if ( spliceInd >= 0 )
@@ -455,7 +456,6 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 			{
 				// This case happens when the remaining splice sites of the chromosome is filter in depth
 				// or a chromosome with no splice sites.
-				//printf( "hi\n") ;
 				int chromId = GetChromIdFromName( chrom ) ;
 				int newChromId = GetChromIdFromName( newChrom ) ;
 				if (  chromId < newChromId )
@@ -468,9 +468,9 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 				else //if (chromId > newChromId)
 				{
 					// there is a chromosome with no splice sites
-					newChrom[0] = '\0' ;
 					char prevChrom[50] ;
 					strcpy( prevChrom, newChrom ) ;
+					newChrom[0] = '\0' ;
 					
 					while ( 1 )
 					{
@@ -512,7 +512,7 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 			pos = end + 1 ;
 			idepth = 100000 ;
 		} 
-		if ( fret != EOF && first && strcmp( inChrom, chrom ) )
+		/*if ( fret != EOF && first && strcmp( inChrom, chrom ) )
 			continue ;
 		if ( fret != EOF && ( !first || isFuture ) && strcmp( inChrom, chrom ) )
 		{
@@ -526,7 +526,27 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 			idepth = 100000 ;
 			pos = end + 1 ;
 			//break ;
+		}*/
+
+		if ( fret != EOF && strcmp( inChrom, chrom ) )
+		{
+			if ( !isFuture )
+			{
+				// Let the logic at the beginning in this while(1) to decide whether to stop or keep reading.
+				// It might happen that the first depth position we get is from next chromosome, 
+				// e.g. the first chromosome is filtered in depth file.
+				strcpy( newChrom, inChrom ) ;
+				newPos = pos ;
+				newDepth = idepth ;
+				continue ; 
+			}
+			else
+			{
+				idepth = 100000 ;
+				pos = end + 1 ;
+			}
 		}
+
 		//if ( !isFuture )
 		//	printf( "%d: %s %d %d\n", isFuture, inChrom, pos, idepth ) ;
 
