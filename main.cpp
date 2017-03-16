@@ -31,7 +31,6 @@ extern bool USE_SET_COVER ;
 extern double IR_ALPHA ;
 extern double FPKM_FRACTION ;
 
-
 bool VERBOSE ;
 int NUM_OF_THREADS = 1 ;
 pthread_attr_t pthreadAttr ;
@@ -313,6 +312,7 @@ int main( int argc, char *argv[] )
 		//printf( "== %d %d %d\n", scnt, start, end ) ;
 		if ( strcmp( chrom, preChrom ) )
 		{
+			ClearOverlapReadsBuffer() ;	
 			if ( strcmp( preChrom, "-1" ) && strcmp( preChrom, "-2" ) )
 			{
 				// TODO: Wait for all the solveRegionThread finish
@@ -398,7 +398,8 @@ int main( int argc, char *argv[] )
 			if ( position == -1 )
 				if ( fscanf( fpDepth, "%s %d %d", buffer, &position, &d ) == EOF )
 					break ;
-
+			
+			//printf( "main: %s %d %d\n", buffer, position, d ) ;
 			tmp = strcmp( buffer, chrom ) ;
 			if ( ( !tmp && position > end ) ||
 					( tmp && started ) )
@@ -406,13 +407,59 @@ int main( int argc, char *argv[] )
 				// End for a region
 				break ;
 			}
+			if ( !tmp && position < start )
+			{
+				position = -1 ;
+				continue ;
+			}
 
-			if ( ( tmp && !started ) ||
+			/*if ( ( tmp && !started ) ||
 					( !tmp && position < start ) )
 			{
 				// Before the region
 				position = -1 ;
 				continue ;
+			}*/
+			if ( tmp )
+			{
+				int chromId = GetChromIdFromName( chrom ) ;
+				int depthChromId = GetChromIdFromName( buffer ) ;
+
+				if ( depthChromId > chromId )
+					break ;
+				else // depthChromId < chromId 
+				{
+					char prevBuffer[2048] ;
+					bool skipped = false ;
+					strcpy( prevBuffer, buffer ) ;
+					while ( 1 )
+					{
+						if ( fscanf( fpDepth, "%s %d %d", buffer, &position, &d ) == EOF )
+						{
+							skipped = true ;
+							break ;
+						}
+
+						if ( !strcmp( prevBuffer, buffer ) )
+							continue ;
+						strcpy( prevBuffer, buffer ) ;
+						depthChromId = GetChromIdFromName( buffer ) ;
+
+						if ( depthChromId < chromId )
+							continue ;
+						else if ( depthChromId > chromId )
+						{
+							skipped = true ;
+							break ;
+						}
+						else
+							break ;
+					}
+					if ( skipped )
+						break ;
+					else 
+						continue ; // The position will be kept when jumped back to the start of the while-loop
+				}
 			}
 
 			started = true ;

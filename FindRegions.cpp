@@ -548,7 +548,7 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 		}
 
 		//if ( !isFuture )
-		//	printf( "%d: %s %d %d\n", isFuture, inChrom, pos, idepth ) ;
+		//	printf( "FindRegions: %s %d %d\n", inChrom, pos, idepth ) ;
 
 		if ( idepth )
 			depth = log( (double)idepth ) / log( LOG_BASE ) ; 
@@ -971,7 +971,6 @@ bool IsInExon( char *chrom, int spliceInd, bool isFuture )
 		cut = true ;	
 	}
 #endif
-
 	return !cut ;
 }
 
@@ -1653,7 +1652,7 @@ void PassSoftBoundary( int tag )
 	int i, k ;		
 	for ( k = tag + 1 ; k < scnt && spliceInfo[k].regionId == spliceInfo[tag].regionId ; ++k )
 	{
-		if ( splices[k].support == -1 )
+		if ( splices[k].support == -1 || splices[k].pos == splices[tag].pos )
 			continue ;
 		spliceInfo[k].soft[0] = spliceInfo[tag].soft[0] ;
 		if ( splices[k].type == 0 && spliceInfo[k].soft[0] == -1 )
@@ -1694,7 +1693,7 @@ void PassSoftBoundary( int tag )
 
 	for ( k = tag - 1 ; k >= 0 && spliceInfo[k].regionId == spliceInfo[tag].regionId ; --k )
 	{
-		if ( splices[k].support == -1 )
+		if ( splices[k].support == -1 || splices[k].pos == splices[tag].pos )
 			continue ;
 		spliceInfo[k].soft[1] = spliceInfo[tag].soft[1] ;
 		if ( splices[k].type == 1 && spliceInfo[k].soft[1] == -1 )
@@ -2402,9 +2401,10 @@ exit( 1 ) ;
 	free( gene ) ;
 	free( groupGeneId ) ;
 	free( spliceIds ) ;
-	//for ( i = 0 ; i < scnt ; ++i )
-	//	printf( "%d: %d region: %d soft: %d %d other:(%d %d)\n", i, splices[i].pos, spliceInfo[i].regionId, spliceInfo[i].soft[0], spliceInfo[i].soft[1], splices[i].otherInd, splices[i].otherPos ) ;
-	fflush( stdout ) ;
+	/*printf( "scnt=%d\n", scnt ) ;
+	for ( i = 0 ; i < scnt ; ++i )
+		printf( "%d: %d region: %d soft: %d %d other:(%d %d)\n", i, splices[i].pos, spliceInfo[i].regionId, spliceInfo[i].soft[0], spliceInfo[i].soft[1], splices[i].otherInd, splices[i].otherPos ) ;
+	fflush( stdout ) ;*/
 }
 
 
@@ -2618,8 +2618,12 @@ int FindPossibleNext( char *chrom, struct _splice ret_splices[], int &spliceCnt,
 	}
 	else if ( usedScnt >= scnt && usedSingleExon >= seCnt )
 	{
-		if ( !GetSplices( curChrom, evidences, eviCnt ) )
-			return 0 ;
+		scnt = 0 ;
+		while ( scnt == 0 )
+		{
+			if ( !GetSplices( curChrom, evidences, eviCnt ) )
+				return 0 ;
+		}
 		usedScnt = 0 ;
 		usedSingleExon = 0 ;
 	}

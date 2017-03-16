@@ -547,10 +547,15 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 		}
 		//printf( "= %d %s: (%d %d) %d\n", rcnt, readid, rstart, rend, start ) ;	
 		tmp = strcmp( chrom, rchrom ) ;		
-		if ( first && tmp )
-			continue ;
-		else if ( !first && tmp )
-			break ;
+		if ( tmp )
+		{
+			int chromId = GetChromIdFromName( chrom ) ;
+			int rChromId = GetChromIdFromName( rchrom ) ; // region chrom id
+			if ( chromId > rChromId )
+				break ;
+			else // chromId < rChromId. So we need to read in more lines
+				continue ;
+		}
 		else if ( !first && start > rend )
 			break ;
 		
@@ -946,4 +951,9 @@ int GetChromIdFromName( const char *s )
 	if ( chrNameToId.find( ss ) == chrNameToId.end() )
 		return -1 ;
 	return chrNameToId[ss] ;
+}
+
+void ClearOverlapReadsBuffer()
+{
+	orCnt = 0 ;
 }
