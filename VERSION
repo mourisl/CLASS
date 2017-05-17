@@ -30,3 +30,5 @@
 	Add XS field if the aligner does not provide such information in BAM file.
 	Handle non-canonical splice sites.
 	Fix a bug for the untraditional chromosomes (i.e. chr14_GL000009v2_random,...)
+5/17/2017 CLASS v2.1.7:
+	Fix more bugs that resulting in no report of transcripts after some chromosomes.
