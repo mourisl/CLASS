@@ -1652,7 +1652,7 @@ void PassSoftBoundary( int tag )
 	int i, k ;		
 	for ( k = tag + 1 ; k < scnt && spliceInfo[k].regionId == spliceInfo[tag].regionId ; ++k )
 	{
-		if ( splices[k].support == -1 || splices[k].pos == splices[tag].pos )
+		if ( splices[k].support == -1 ) //|| splices[k].pos == splices[tag].pos )
 			continue ;
 		spliceInfo[k].soft[0] = spliceInfo[tag].soft[0] ;
 		if ( splices[k].type == 0 && spliceInfo[k].soft[0] == -1 )
@@ -1662,7 +1662,7 @@ void PassSoftBoundary( int tag )
 			if ( spliceInfo[k].soft[0] <= 0 )
 				spliceInfo[k].soft[0] = 1 ;
 		}
-		else if ( splices[k].type == 1 && spliceInfo[k].soft[0] == -1 )
+		else if ( splices[k].type == 1 && spliceInfo[k].soft[0] == -1 && splices[k].pos != splices[tag].pos )
 		{
 			// Test whether the portion between tag and k belongs to exons.
 			int len = 0 ;
@@ -1693,13 +1693,13 @@ void PassSoftBoundary( int tag )
 
 	for ( k = tag - 1 ; k >= 0 && spliceInfo[k].regionId == spliceInfo[tag].regionId ; --k )
 	{
-		if ( splices[k].support == -1 || splices[k].pos == splices[tag].pos )
+		if ( splices[k].support == -1 ) //|| splices[k].pos == splices[tag].pos )
 			continue ;
 		spliceInfo[k].soft[1] = spliceInfo[tag].soft[1] ;
 		if ( splices[k].type == 1 && spliceInfo[k].soft[1] == -1 )
 			spliceInfo[k].soft[1] = ( splices[k].pos + READS_LENGTH > splices[tag].pos ) ?
 				( splices[k].pos + READS_LENGTH ) : splices[tag].pos ;
-		else if ( splices[k].type == 0 && spliceInfo[k].soft[1] == -1 )
+		else if ( splices[k].type == 0 && spliceInfo[k].soft[1] == -1 && splices[k].pos != splices[tag].pos )
 		{
 			int len = 0 ;
 			double sum = 0 ;
