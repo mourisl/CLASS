@@ -3392,11 +3392,11 @@ void PickTranscriptsByDP( char *chrom, int from, int to, struct _exonNode nodes[
 			++nodes[ transcripts[tcnt].eid[i] ].weight ;
 		//OutputTranscript( chrom, exons, &transcript ) ;
 		
-		printf( "%lf %lf\n",  best.cover, bestScore ) ;
+		/*printf( "%lf %lf\n",  best.cover, bestScore ) ;
 		printf( "\t" ) ;
 		for ( i = 0 ; i < best.ecnt ; ++i )
 			printf( "%d ", best.eid[i] ) ;
-		printf( "\n" ) ;
+		printf( "\n" ) ;*/
 
 		/*if ( transcriptId == 26 )
 		  {
