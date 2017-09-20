@@ -1741,12 +1741,13 @@ void PreprocessSplices( char *chrom, struct _evidence *evidences, int eviCnt )
 	int eviTag = 0 ;
 	int solvedSpliceId ;
 
-	// Firstly, remove the negative splice junctions, or splices spanning too much.
+	// Firstly, remove the negative splice junctions, or splices spanning too much or the edit distance is too much.
 	for ( i = 0 ; i < scnt ; ++i )
 	{
 		if ( splices[i].otherInd < i || 
 			( splices[i].support > 0 && ( splices[ splices[i].otherInd ].pos - splices[i].pos <= 100000 || 
-			 splices[i].otherInd - i <= 400 ) ) )
+			 splices[i].otherInd - i <= 400 )  
+			 && splices[i].support * 2 > splices[i].uniqEditDistance + splices[i].secEditDistance ) ) 
 			continue ;
 		if ( evidences != NULL )
 		{	
@@ -1783,7 +1784,7 @@ exit( 1 ) ;
 		}
 		else if ( splices[i].support > 0 )
 		{
-			//printf( "revmoed %d %d: %d\n", splices[i].pos, splices[ splices[i].otherInd ].pos, splices[i].support  ) ;
+			//printf( "revmoed %d %d: %d\n", splices[i].pos, splices[ splices[i].otherInd ].pos, splices[i].support ) ;
 			splices[i].support = -1 ;
 			splices[ splices[i].otherInd ].support = -1 ;
 		}
@@ -1792,7 +1793,9 @@ exit( 1 ) ;
 	for ( i = 0 ; i < scnt ; ++i )
 	{
 		if ( splices[i].support <= 0 )
+		{
 			continue ;
+		}
 		splices[k] = splices[i] ;
 		spliceInfo[k] = spliceInfo[i] ;
 		splices[ splices[k].otherInd ].otherInd = k ;
@@ -1800,6 +1803,59 @@ exit( 1 ) ;
 	}
 	scnt = k ;
 	eviTag = 0 ;
+	
+	// If a site is associate with too many introns, we need to filter some of those, since no matter what
+	// the algorithm will have difficulty of picking the right path at this region.
+	for ( i = 0 ; i < scnt ;  )
+	{
+		// sites in the range of [i,j) have the same coordinate.
+		for ( j = i + 1 ; j < scnt ; ++j )	
+			if ( splices[j].pos != splices[i].pos )
+				break ;
+		if ( j - i < 10 )
+		{
+			i = j ;
+			continue ;	
+		}
+
+		int maxUniqSupport = -1 ;
+		for ( k = i ; k < j ; ++k )		
+			if ( splices[k].uniqSupport > maxUniqSupport )
+				maxUniqSupport = splices[k].uniqSupport ;
+
+		for ( k = i ; k < j ; ++k )
+		{
+			if ( splices[k].support <= 0.01 * maxUniqSupport )
+			{
+				splices[k].support = -1 ;
+				splices[ splices[k].otherInd ].support = -1 ;
+			}
+			int span = splices[ splices[k].otherInd].pos - splices[k].pos ;
+			if ( span < 0 )
+				span = -span ;
+			if ( span >= 100000 )
+			{
+				splices[k].support = -1 ;
+				splices[ splices[k].otherInd ].support = -1 ;
+			}
+		}
+
+		i = j ;
+	}
+	
+	k = 0 ;
+	for ( i = 0 ; i < scnt ; ++i )
+	{
+		if ( splices[i].support <= 0 )
+		{
+			continue ;
+		}
+		splices[k] = splices[i] ;
+		spliceInfo[k] = spliceInfo[i] ;
+		splices[ splices[k].otherInd ].otherInd = k ;
+		++k ;
+	}
+	scnt = k ;
 
 
 	// Then we remove a splice that are in a bunch of opposite strands splice sites, and support by no more than 2 reads.

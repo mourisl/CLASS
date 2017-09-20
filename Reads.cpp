@@ -562,6 +562,7 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 		num = 0 ;
 		len = 0 ;
 		reads[ rcnt ].scnt = 0 ;
+		bool softClipped = false ;
 		for ( i = 0 ; cigar[i] ; ++i )
 		{
 			if ( cigar[i] >= '0' && cigar[i] <= '9' )
@@ -569,6 +570,8 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 			else if ( cigar[i] == 'I' || cigar[i] == 'S' || cigar[i] == 'H'
 				|| cigar[i] == 'P' )
 			{
+				if ( cigar[i] == 'S' )
+					softClipped = true ;
 				num = 0 ;
 			}
 			else if ( cigar[i] == 'N' )
@@ -593,6 +596,8 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 		//printf( "# %d %s: (%d %d) %d %d\n", rcnt, readid, rstart, rend, start, flag & 4 ) ;		
 		if ( start + len - 1 < rstart )
 			continue ;
+		//if ( !VAR_RD_LEN && softClipped )
+		//	continue ;
 		
 		//if (rstart == 9908278 )
 		//	printf( "%s %d: %d\n", readid, flag, rcnt ) ;	

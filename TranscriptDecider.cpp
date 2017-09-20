@@ -903,19 +903,22 @@ void PickTranscripts( char *chrom, struct _exonNode nodes[], struct _exon exons[
 	for ( i = 0 ; i < atcnt ; ++i )
 		bAll.Or( btable[i] ) ;
 	//printf( "# %d\n", tcCnt ) ;
-	for ( i = 0 ; i < tcCnt ; ++i )
+	/*for ( i = 0 ; i < tcCnt ; ++i )
+	{
 		if ( !bAll.Test(i) )
 		{
 			//tcUsedCnt[i] = MAX_READ ;
 			tc[i].support = tc[i].abundance = 0 ;
-			/*printf( "## %d :", i ) ;
-			printf( "%d %d: ", tc[i].lcnt, tc[i].rcnt ) ;
-			for ( j = 0 ; j < tc[i].lcnt ; ++j )
-				printf( "(%d %d) ", tc[i].leftInfo[j][0], tc[i].leftInfo[j][1] ) ;
-			for ( j = 0 ; j < tc[i].rcnt ; ++j )
-				printf( "(%d %d) ", tc[i].rightInfo[j][0], tc[i].rightInfo[j][1] ) ;
-			printf( "\n" ) ;*/
 		}
+		printf( "## %d %lf:", i, tc[i].normAbund ) ;
+		printf( "%d %d: ", tc[i].lcnt, tc[i].rcnt ) ;
+		for ( j = 0 ; j < tc[i].lcnt ; ++j )
+			printf( "(%d %d) ", tc[i].leftInfo[j][0], tc[i].leftInfo[j][1] ) ;
+		for ( j = 0 ; j < tc[i].rcnt ; ++j )
+			printf( "[%d %d] ", tc[i].rightInfo[j][0], tc[i].rightInfo[j][1] ) ;
+		printf( "\n" ) ;
+
+	}*/
 
 	/*for ( i = 0 ; i < tcCnt ; ++i )
 	{
@@ -954,12 +957,12 @@ void PickTranscripts( char *chrom, struct _exonNode nodes[], struct _exon exons[
 		}
 		if ( abundance == MAX_READ )
 			abundance = 1 ;	
-		printf( "%d %d : ", transcriptId, btable[i].Count() ) ;
+		printf( "%d %d : ", i, btable[i].Count() ) ;
 		for ( j = 0 ; j < aused ; ++j )
 			printf( "%lf ", (double)abundances[j] ) ;
 		printf( "\n" ) ;
-		alltranscripts[i].transcriptId = transcriptId ;
-		++transcriptId ;
+		alltranscripts[i].transcriptId = i ;
+		//++i ;
 		OutputTranscript( chrom, exons, &alltranscripts[i] ) ;
 		free( abundances ) ;
 	}
@@ -3241,9 +3244,7 @@ void PickTranscriptsByDP( char *chrom, int from, int to, struct _exonNode nodes[
 		if ( nodes[i].pcnt )//|| !nodes[i].ncnt )
 			continue ;
 		head[0] = i ;
-		//printf( "before %d\n", i ) ;
 		tmp = SolveSubTranscript( head, 1, attr, nodes, exons, tc, tcCnt ) ;
-		//printf( "after %d\n", i ) ;
 		if ( tmp.cover > maxAbundance ) // Actually, it is abundance
 			maxAbundance = tmp.cover ;
 		if ( tmp.cover != -1 )
@@ -3391,11 +3392,11 @@ void PickTranscriptsByDP( char *chrom, int from, int to, struct _exonNode nodes[
 			++nodes[ transcripts[tcnt].eid[i] ].weight ;
 		//OutputTranscript( chrom, exons, &transcript ) ;
 		
-		/*printf( "%lf %lf\n",  best.cover, bestScore ) ;
+		printf( "%lf %lf\n",  best.cover, bestScore ) ;
 		printf( "\t" ) ;
 		for ( i = 0 ; i < best.ecnt ; ++i )
 			printf( "%d ", best.eid[i] ) ;
-		printf( "\n" ) ;*/
+		printf( "\n" ) ;
 
 		/*if ( transcriptId == 26 )
 		  {
