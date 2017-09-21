@@ -185,6 +185,7 @@ struct _dpAttribute
 	int *bufferEid ;
 	//struct _tcList *partPairExonTc ; // The 
 	int timeStamp ;
+	int *solveCaller ; // count how many times we called SolveSub without using memoir.
 } ;
 
 struct _dp SolveSubTranscript( int visit[], int vcnt, const struct _dpAttribute &attr, struct _exonNode nodes[], struct _exon exons[], 
@@ -1056,7 +1057,7 @@ void PickTranscripts( char *chrom, struct _exonNode nodes[], struct _exon exons[
 			if ( value > maxAbundance )
 				maxAbundance = value ;
 		}
-		//printf( "maxAbundance = %lf\n", maxAbundance ) ;
+		//printf( "maxAbundance = %lf %d\n", maxAbundance, atcnt ) ;
 		//printf( "Choose: " ) ;
 		while ( 1 ) 
 		{
@@ -2696,6 +2697,7 @@ struct _dp SolveSubTranscript( int visit[], int vcnt, const struct _dpAttribute 
 	//if ( attr.forAbundance == true )
 	//	printf( "" ) ;
 
+	++(*attr.solveCaller) ;
 	visitDp.ecnt = ret.ecnt = 0 ;
 	visitDp.eid = ret.eid = NULL ;
 	
@@ -2813,6 +2815,7 @@ struct _dp SolveSubTranscript( int visit[], int vcnt, const struct _dpAttribute 
 			}
 		}
 	}
+	
 
 	int *nextv = ( int * )malloc( sizeof( int ) * attr.size ) ;
 	int *extends = ( int *)malloc( sizeof( int ) * ( tcCnt + 1 ) ) ; // The possible compatible transcript constraints ids sorted by their ends.
@@ -3238,19 +3241,23 @@ void PickTranscriptsByDP( char *chrom, int from, int to, struct _exonNode nodes[
 	attr.minAbundance = 0 ;
 	attr.timeStamp = 1 ;
 	maxAbundance = -1 ;
+	int solveCaller = 0 ;
+	attr.solveCaller = &solveCaller ;
 	//printf( "before find maxAbundance\n" ) ;
 	for ( i = from ; i <= to ; ++i )
 	{
 		if ( nodes[i].pcnt )//|| !nodes[i].ncnt )
 			continue ;
 		head[0] = i ;
+		//printf( "hi1: %d\n", i ) ;
 		tmp = SolveSubTranscript( head, 1, attr, nodes, exons, tc, tcCnt ) ;
+		//printf( "hi2: %d\n", i ) ;
 		if ( tmp.cover > maxAbundance ) // Actually, it is abundance
 			maxAbundance = tmp.cover ;
 		if ( tmp.cover != -1 )
 			free( tmp.eid ) ;
 	}
-	//printf( "after find maxAbundance: %lf\n", maxAbundance ) ;
+	//printf( "after find maxAbundance: %lf %d\n", maxAbundance, solveCaller ) ;
 	attr.forAbundance = false ;
 	//CleanDpMemo( attr ) ;
 	++attr.timeStamp ;
@@ -3425,7 +3432,9 @@ void PickTranscriptsByDP( char *chrom, int from, int to, struct _exonNode nodes[
 		// Remove the constraints it covers
 		double factor = 1 ;
 		if ( tcCnt > 3000 )
-			factor = ( ( tcCnt - 3000.0 ) / 1000.0 + 1 ) ;
+			factor *= ( ( tcCnt - 3000.0 ) / 1000.0 + 1 ) ;
+		if ( solveCaller > 5000 )
+			factor *= ( ( factor - 5000.0 ) / 2500.0 ) ;
 		factor = factor * factor ;
 		for ( j = 0 ; j < tcCnt ; ++j )
 		{
@@ -4438,7 +4447,7 @@ void *PickTranscripts_Thread( void *arg )
 	if ( !useDP )
 	{
 		// If there are too many constraints
-		if ( tcCnt > 3000 && k > 200 )
+		if ( tcCnt * k > 600000 || tcCnt * k < 0 )
 			useDP = true ;
 	}
 

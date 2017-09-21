@@ -1746,8 +1746,7 @@ void PreprocessSplices( char *chrom, struct _evidence *evidences, int eviCnt )
 	{
 		if ( splices[i].otherInd < i || 
 			( splices[i].support > 0 && ( splices[ splices[i].otherInd ].pos - splices[i].pos <= 100000 || 
-			 splices[i].otherInd - i <= 400 )  
-			 && splices[i].support * 2 > splices[i].uniqEditDistance + splices[i].secEditDistance ) ) 
+			 splices[i].otherInd - i <= 400 ) ) )  
 			continue ;
 		if ( evidences != NULL )
 		{	
@@ -1830,6 +1829,12 @@ exit( 1 ) ;
 				splices[k].support = -1 ;
 				splices[ splices[k].otherInd ].support = -1 ;
 			}
+			if ( splices[i].support * 2 < splices[i].uniqEditDistance + splices[i].secEditDistance ) 
+			{
+				splices[k].support = -1 ;
+				splices[ splices[k].otherInd ].support = -1 ;
+			}
+
 			int span = splices[ splices[k].otherInd].pos - splices[k].pos ;
 			if ( span < 0 )
 				span = -span ;
@@ -2289,6 +2294,19 @@ exit( 1 ) ;
 
 	  i = j ;
 	}*/
+	
+	/**=================================================================
+	Remove splice junctions in a complicated region
+	================================================================== */
+	/*for ( i = 0 ; i < scnt ; ++i )
+	{
+		// [i,j) is a region.
+		for ( j = i + 1 ; j < scnt ; ++j )
+			if ( spliceInfo[j].regionId != spliceInfo[i].regionId )
+				break ;
+		if ( j - i <= 10 )
+	}*/
+
 	/**=================================================================
 	Remove splice junction in a false region
 	================================================================== */
@@ -2459,7 +2477,7 @@ exit( 1 ) ;
 	free( spliceIds ) ;
 	/*printf( "scnt=%d\n", scnt ) ;
 	for ( i = 0 ; i < scnt ; ++i )
-		printf( "%d: %d region: %d soft: %d %d other:(%d %d)\n", i, splices[i].pos, spliceInfo[i].regionId, spliceInfo[i].soft[0], spliceInfo[i].soft[1], splices[i].otherInd, splices[i].otherPos ) ;
+		printf( "%d: %d region: %d soft: %d %d other:(%d %d) support: %d\n", i, splices[i].pos, spliceInfo[i].regionId, spliceInfo[i].soft[0], spliceInfo[i].soft[1], splices[i].otherInd, splices[i].otherPos, splices[i].support ) ;
 	fflush( stdout ) ;*/
 }
 
