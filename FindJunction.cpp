@@ -841,7 +841,10 @@ int main( int argc, char *argv[] )
 	{
 		useSam = false ;
 		fp = NULL ;
-		fp = fopen( argv[1], "r" ) ;
+		if ( !strcmp( argv[1], "-" ) )
+			fp = stdin ;
+		else
+			fp = fopen( argv[1], "r" ) ;
 		if ( fp == NULL )
 		{
 			printf( "Could not open file %s\n", argv[1] ) ;
