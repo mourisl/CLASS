@@ -16,6 +16,7 @@
 //int ExtractExons( FILE *fp ) ;
 
 void FindRegions_Init( char *prefix, char *otherJunctionFile ) ;
+void FindRegions_Destroy() ;
 
 int FindRegions_Next( char *chrom, struct _splice splices[], int &scnt, int &start, int &end, struct _evidence *evidences, int &eviCnt ) ; 
 #endif

@@ -223,6 +223,13 @@ void TranscriptDecider_Init( char *prefix )
 	memset( geneTranscriptId, 0, sizeof( geneTranscriptId ) ) ;
 }
 
+void TranscriptDecider_Destroy()
+{
+	CloseReadFile( td_fpReads ) ;
+	ReleaseGeneReads( &transcriptReads ) ;
+	fclose( td_fpDepth ) ;
+}
+
 // @return: FPKM of the transcripts
 double GetTranscriptAbundance( struct _exon exons[], struct _transcript *transcript )
 {
@@ -4242,7 +4249,7 @@ void RefineTranscripts( char *chrom, int from, int to, struct _exonNode nodes[],
 			//printf( "hi %d %lf\n", transcripts[i].geneId, geneAbundance[ transcripts[i].geneId ] ) ;
 			OutputTranscript( chrom, exons, &transcripts[i] ) ;	
 		}*/
-		if ( transcripts[i].FPKM < geneAbundance[ transcripts[i].geneId ] * FPKM_FRACTION )
+		if ( transcripts[i].geneId != -1 && transcripts[i].FPKM < geneAbundance[ transcripts[i].geneId ] * FPKM_FRACTION )
 		{
 			// Check whether it is in the evidence. If not, then we remove it.
 			//if ( exons[ transcripts[i].eid[0] ].end == 45340498 )

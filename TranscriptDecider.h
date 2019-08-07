@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 void TranscriptDecider_Init( char *prefix ) ;
+void TranscriptDecider_Destroy() ;
 void TranscriptDecider_Go( char *chrom, struct _exon exons[], int exonCnt, struct _evidence *inEvidences, int inEviCnt ) ;
 
 #endif

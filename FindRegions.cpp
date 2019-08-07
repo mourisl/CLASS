@@ -1420,6 +1420,17 @@ void FindRegions_Init( char *prefix, char *otherJunctionFile )
 	eviExonCnt = 0 ;
 }
 
+void FindRegions_Destroy()
+{
+	CloseReadFile( fpReads ) ;
+	CloseReadFile( fpReadsForGroup ) ;
+	fclose( fpDepth ) ;
+	fclose( fpDepthForGroup ) ;
+	fclose( fpSplice ) ;
+	free( splices ) ;
+	free( tmpSplices ) ;
+}
+
 // Groups are just preliminary regions
 int GetSpliceGroups( char *chrom, struct _pair groups[] )
 {
@@ -2575,7 +2586,7 @@ int GetSplices( char *chrom, struct _evidence *evidences, int &eviCnt )
 				inSupport = inUniqSupport + 1 ;
 		}
 
-		for ( i = scnt - 1 ; splices[i].pos > inStart && i >= 0 ; --i )
+		for ( i = scnt - 1 ; i >= 0 && splices[i].pos > inStart ; --i )
 		{
 			if ( splices[i].otherInd != -1 )
 				++splices[ splices[i].otherInd ].otherInd ; 

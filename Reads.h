@@ -51,6 +51,7 @@ struct _geneRead
 } ;
 
 struct _readFile OpenReadFile( char *prefix ) ;
+void CloseReadFile( struct _readFile &readFile ) ;
 
 //int GetReadsLength( FILE *fp ) ;
 void GetReadsInfo( struct _readFile file, int &readsLen, int &fragLen, int &fragStd, long long &totalReadCnt ) ;
@@ -64,7 +65,7 @@ void GetReadsInfo( struct _readFile file, int &readsLen, int &fragLen, int &frag
 int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, struct _read reads[], int extent[2] ) ; 
 
 void InitGeneReads( struct _geneRead *geneReads ) ;
-
+void ReleaseGeneReads( struct _geneRead *geneReads ) ;
 //int ExtractGeneReads( FILE *fp, char *rchrom, int rstart, int rend, struct _geneRead geneReads, int extent[2] ) ;
 int ExtractGeneReads( struct _readFile file, char *rchrom, int rstart, int rend, struct _geneRead geneReads, int extent[2] ) ;
 

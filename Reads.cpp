@@ -87,6 +87,14 @@ struct _readFile OpenReadFile( char *prefix )
 	exit( 1 ) ;
 }
 
+void CloseReadFile( struct _readFile &readFile )
+{
+	if ( readFile.sam )
+		samclose( readFile.fpsam ) ;
+	else
+		fclose( readFile.fp ) ;
+}
+
 extern int CompInt( const void *p1, const void *p2 ) ;
 
 void GetReadsInfo( struct _readFile file, int &readsLen, int &fragLen, int &fragStd, long long &totalReadCnt ) 
@@ -129,6 +137,7 @@ void GetReadsInfo( struct _readFile file, int &readsLen, int &fragLen, int &frag
 			++totalReadCnt ;
 			++cnt ;
 		}
+		bam_destroy1( read ) ;
 
 		while ( samread( file.fpsam, read ) > 0 )
 			++totalReadCnt ;
@@ -496,7 +505,8 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 		if ( overlapReads[i].start == -1 )
 			continue ;
 		overlapReads[k] = overlapReads[i] ;
-		strcpy( overlapReadsId[k], overlapReadsId[i] ) ;
+		if ( k != i )
+			strcpy( overlapReadsId[k], overlapReadsId[i] ) ;
 		++k ;
 	}
 	orCnt = k ;
@@ -692,6 +702,8 @@ int ExtractReads( struct _readFile file, char *rchrom, int rstart, int rend, str
 			break ;			
 	}
 	extent[0] = reads[0].start ;
+	if ( b )
+		bam_destroy1( b ) ;
 	return rcnt ;	
 }
 
@@ -714,6 +726,14 @@ void InitGeneReads( struct _geneRead *geneReads )
 	}	
 }
 
+void ReleaseGeneReads( struct _geneRead *geneReads )
+{
+	int i ;
+	for ( i = 0 ; i < GENE_READ_MULT ; ++i )
+		free( geneReads->reads[i] ) ;
+	for ( i = 0 ; i < GENE_READ_HASH_MULT ; ++i )
+		free( geneReads->hash[i] ) ;
+}
 
 int ExtractGeneReads( struct _readFile file, char *rchrom, int rstart, int rend, struct _geneRead geneReads, int extent[2] )
 {
@@ -923,6 +943,9 @@ int ExtractGeneReads( struct _readFile file, char *rchrom, int rstart, int rend,
 		}
 		++rcnt ;		
 	}
+	
+	if ( b )
+		bam_destroy1( b ) ;
 	extent[0] = geneReads.reads[0][0].start ;
 	return rcnt ;	
 }
@@ -962,3 +985,4 @@ void ClearOverlapReadsBuffer()
 {
 	orCnt = 0 ;
 }
+

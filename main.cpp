@@ -265,6 +265,7 @@ int main( int argc, char *argv[] )
 	if ( VERBOSE )
 		printf( "# Alignments information of %d reads: Read_Length=%d Fragment_Length=%d Fragment_Stddev=%d\n",
 				TOTAL_READ_COUNT, READS_LENGTH, FRAG_LENGTH, FRAG_STD ) ;
+	CloseReadFile( fpReads ) ;
 
 	fpReads = OpenReadFile( argv[1] ) ;
 	//memset( exons, -1, sizeof( exons ) ) ;	
@@ -639,10 +640,17 @@ int main( int argc, char *argv[] )
 
 		TranscriptDecider_Go( preChrom, exons, exonCnt, evidences, eviCnt ) ;
 	}
+	
+	for ( i = 0 ; i < MAX_EXON ; ++i )
+	{
+		free( exons[i].next ) ;
+		free( exons[i].prev ) ;
+	}
 	//printf( "### %s %d\n", preChrom, exonCnt ) ;
 	//fprintf( stderr, "Finished\n" ) ; fflush( stderr ) ;	
 	//fclose( fpHeader ) ;
 	//fclose( fpReads ) ;
+	CloseReadFile( fpReads ) ;
 
 	//if ( fpPolyA )
 	//	fclose( fpPolyA ) ;
@@ -652,6 +660,9 @@ int main( int argc, char *argv[] )
 	pthread_cond_destroy( &idleSolveRegionCond ) ;
 	pthread_cond_destroy( &clearSolveRegionCond ) ;
 	fclose( fpDepth ) ;
+
+	FindRegions_Destroy() ;
+	TranscriptDecider_Destroy() ;
 
 	gettimeofday( &endTime, NULL ) ;	
 
