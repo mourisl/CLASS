@@ -2834,7 +2834,7 @@ int SolveRegion_Wrapper( char *chrom, struct _splice splices[], int scnt, int so
 	}
 	
 	tts = TTS_GetCurrentTTS( ttsCnt ) ;
-	if ( tts > 0 ) //&& ( softEnd != -1 || softStart != -1 ) )
+	if ( ttsCnt > 0 ) //&& ( softEnd != -1 || softStart != -1 ) )
 	{
 		// Adjust ttsTAg ;
 		if ( strcmp( prevTTSChrom, chrom ) )
